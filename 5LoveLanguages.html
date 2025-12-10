@@ -1,0 +1,417 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>愛的語言測驗 - 莫蘭迪黃雷達圖版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        morandi: {
+                            bg: '#F5F2EA',       /* 淺米色背景 */
+                            card: '#FFFDF9',     /* 卡片白 */
+                            primary: '#DBCFB0',  /* 莫蘭迪黃主色 */
+                            secondary: '#B8A88A',/* 深一點的卡其黃 */
+                            accent: '#948B78',   /* 點綴的灰棕色 */
+                            text: '#5C554B',     /* 深灰褐文字 */
+                            light: '#EBE6D8'     /* 淺色裝飾 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F5F2EA; /* morandi.bg */
+            color: #5C554B; /* morandi.text */
+            transition: background-color 0.5s ease;
+        }
+        .screen {
+            display: none;
+            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar-fill {
+            transition: width 0.4s ease-in-out;
+        }
+        .image-container {
+            width: 12rem;
+            height: 12rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid #DBCFB0; /* morandi.primary */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* 按鈕樣式優化 */
+        .btn-primary {
+            background-color: #B8A88A; /* morandi.secondary */
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #948B78; /* morandi.accent */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(148, 139, 120, 0.3);
+        }
+        .option-btn {
+            background-color: #FFFDF9; /* morandi.card */
+            border: 1px solid #EBE6D8; /* morandi.light */
+            color: #5C554B;
+        }
+        .option-btn:hover {
+            background-color: #EBE6D8; /* morandi.light */
+            border-color: #DBCFB0;
+        }
+        /* 社群 ICON 樣式 */
+        .social-icon {
+            color: #B8A88A; /* 預設莫蘭迪色 */
+            transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+            transform: translateY(-3px);
+        }
+        .social-icon.fb:hover { color: #1877F2; }
+        .social-icon.ig:hover { color: #E1306C; }
+        .social-icon.yt:hover { color: #FF0000; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 pb-24">
+
+    <div class="w-full max-w-xl mx-auto">
+
+        <!-- 開始畫面 -->
+        <div id="start-screen" class="screen text-center bg-white p-8 rounded-2xl shadow-xl border border-[#EBE6D8]">
+            <img src="welcome.png">
+            
+            <h1 class="text-3xl font-bold text-morandi-text mb-3 tracking-wide">愛的語言測驗</h1>
+            <h2 class="text-lg text-morandi-accent mb-6 font-medium">30題完整版分析</h2>
+            <p class="text-gray-500 mb-8 leading-relaxed">透過細緻的情境選擇，<br>繪製出屬於你獨一無二的愛之語雷達圖。</p>
+            
+            <button id="start-btn" class="w-full btn-primary font-bold py-3.5 px-6 rounded-xl text-lg shadow-md">
+                開始探索
+            </button>
+        </div>
+
+        <!-- 測驗畫面 -->
+        <div id="quiz-screen" class="screen bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-[#EBE6D8]">
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-morandi-accent tracking-wider">PROGRESS</span>
+                    <span id="progress-text" class="text-sm font-bold text-morandi-secondary">1 / 30</span>
+                </div>
+                <div class="w-full bg-[#EBE6D8] rounded-full h-2">
+                    <div id="progress-bar" class="bg-morandi-secondary h-2 rounded-full progress-bar-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="min-h-[80px] flex items-center justify-center mb-8">
+                <h2 id="question-text" class="text-xl font-bold text-morandi-text text-center leading-relaxed"></h2>
+            </div>
+            
+            <div id="options-container" class="space-y-4"></div>
+        </div>
+
+        <!-- 結果畫面 -->
+        <div id="result-screen" class="screen text-center bg-white p-8 rounded-2xl shadow-xl border border-[#EBE6D8] relative">
+            <button id="restart-icon-btn" class="absolute top-4 right-4 text-gray-400 hover:text-morandi-secondary transition-colors" title="重新測驗">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+
+            <p class="text-morandi-accent font-medium mb-1 tracking-widest text-sm uppercase">Analysis Result</p>
+            <h2 class="text-2xl font-bold text-morandi-text mb-6">你的愛之語雷達圖</h2>
+            
+            <div class="relative w-full h-64 mb-8">
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <h2 id="result-title" class="text-3xl font-bold text-morandi-text mb-5"></h2>
+            
+            <div class="image-container">
+                 <img id="result-image" src="" alt="結果圖片" class="transition-opacity duration-500">
+            </div>
+
+            <p id="result-description" class="text-gray-600 mb-8 text-left leading-loose bg-[#F9F7F2] p-6 rounded-xl border border-[#EBE6D8]"></p>
+            
+            <div id="advice-container" class="mb-0"></div>
+        </div>
+
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center bg-[#F5F2EA]/95 backdrop-blur-sm border-t border-[#EBE6D8] z-20">
+        <div class="flex justify-center items-center space-x-8 mb-2">
+            <!-- Facebook -->
+            <a href="https://www.facebook.com/p/Ai%E8%A6%AA%E5%AD%90%E6%88%90%E9%95%B7%E5%B1%8B-61579308823985/" target="_blank" class="social-icon fb" title="Facebook">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
+            </a>
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/aifamily0708/?igsh=MXdlbzFsaTYxMDhidw%3D%3D&utm_source=qr#" target="_blank" class="social-icon ig" title="Instagram">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.585-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.585.069-4.85c.149-3.225 1.664 4.771 4.919-4.919 1.266-.058 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"></path></svg>
+            </a>
+            <!-- YouTube -->
+            <a href="https://youtube.com/@aifamily0708?si=wNQOpbrDk312GpC5" target="_blank" class="social-icon yt" title="YouTube">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path></svg>
+            </a>
+        </div>
+        <p class="text-morandi-accent text-xs">Copyright © Ai親子成長屋 Ai family</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const screens = document.querySelectorAll('.screen');
+        const startBtn = document.getElementById('start-btn');
+        const quizScreen = document.getElementById('quiz-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultScreen = document.getElementById('result-screen');
+        const restartIconBtn = document.getElementById('restart-icon-btn');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const resultImage = document.getElementById('result-image');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const adviceContainer = document.getElementById('advice-container');
+
+        // 30道題目資料
+        const questions = [
+            { id: 1, options: [{ text: "我喜歡收到寫滿讚美與肯定的小紙條", type: "words" }, { text: "我喜歡被擁抱的感覺", type: "touch" }] },
+            { id: 2, options: [{ text: "我很喜歡和我心目中占有特殊地位的人獨處", type: "time" }, { text: "每當有人給我實際的幫助，我就會覺得他是愛我的", type: "service" }] },
+            { id: 3, options: [{ text: "我喜歡收到禮物", type: "gifts" }, { text: "我有空就喜歡去探訪朋友和所愛的人", type: "time" }] },
+            { id: 4, options: [{ text: "有人幫我做事，我就會覺得被愛", type: "service" }, { text: "有人碰觸我的身體，我就會覺得被愛", type: "touch" }] },
+            { id: 5, options: [{ text: "當我所愛、所景仰的人攬著我的肩膀，我就會有所被愛的感覺", type: "touch" }, { text: "當我所愛、所景仰的人送我禮物，我就會有被愛的感覺", type: "gifts" }] },
+            { id: 6, options: [{ text: "我喜歡和朋友或所愛的人到處走走", type: "time" }, { text: "我喜歡和在我心目中有特殊地位的人擊掌或手牽手", type: "touch" }] },
+            { id: 7, options: [{ text: "愛的具體象徵(禮物)對我很重要", type: "gifts" }, { text: "受到別人的肯定讓我有被愛的感覺", type: "words" }] },
+            { id: 8, options: [{ text: "我喜歡和我所喜歡的人促膝長談", type: "time" }, { text: "我喜歡聽到別人說我很漂亮，很迷人", type: "words" }] },
+            { id: 9, options: [{ text: "我喜歡和好友及所愛的人在一起", type: "time" }, { text: "我喜歡收到朋友或所愛的人送的禮物", type: "gifts" }] },
+            { id: 10, options: [{ text: "我喜歡聽到別人接納我的話", type: "words" }, { text: "如果有人幫我的忙，我會知道他是愛我的", type: "service" }] },
+            { id: 11, options: [{ text: "我喜歡和朋友與所愛的人一起做同一件事", type: "time" }, { text: "我喜歡聽到別人對我說友善的話", type: "words" }] },
+            { id: 12, options: [{ text: "別人的表現(服務)要比他的言語更能感動我", type: "service" }, { text: "被擁抱讓我覺得與對方很親近，也覺得自己很重要", type: "touch" }] },
+            { id: 13, options: [{ text: "我珍惜別人的讚美，盡量避免受到批評", type: "words" }, { text: "送我許多小禮物要比送我一份大禮更能感動我", type: "gifts" }] },
+            { id: 14, options: [{ text: "當我和人聊天或一起做事時，我會覺得與他很親近", type: "time" }, { text: "朋友和我所愛的人若常常與我有身體的接觸，我會覺得與他很親近", type: "touch" }] },
+            { id: 15, options: [{ text: "我喜歡聽到別人稱讚我的成就", type: "words" }, { text: "當別人勉強自己為我做一件事，我會覺得他很愛我", type: "service" }] },
+            { id: 16, options: [{ text: "我喜歡朋友和所愛的人走過身邊時，故意用身體碰碰我的感覺", type: "touch" }, { text: "我喜歡別人聽我說話，而且興趣十足的樣子", type: "time" }] },
+            { id: 17, options: [{ text: "當朋友和所愛的人幫助我完成工作，我會覺得被愛", type: "service" }, { text: "我很喜歡收到朋友和所愛的人的禮物", type: "gifts" }] },
+            { id: 18, options: [{ text: "我喜歡聽到別人稱讚我的外表", type: "words" }, { text: "別人願意體諒我的感受時，我會有被愛的感覺", type: "time" }] },
+            { id: 19, options: [{ text: "在我心目中有特殊地位的人碰我的身體時，我會很有安全感", type: "touch" }, { text: "服務的行動讓我覺得被愛", type: "service" }] },
+            { id: 20, options: [{ text: "我很感激在我心目中有特殊地位的人為我付出那麼多", type: "service" }, { text: "我喜歡收到我心目中有特殊地位的人送我禮物", type: "gifts" }] },
+            { id: 21, options: [{ text: "我很喜歡被人呵護備至的感覺 (精心時刻)", type: "time" }, { text: "我很喜歡被別人服務的感覺", type: "service" }] },
+            { id: 22, options: [{ text: "有人送我生日禮物時，我會覺得被愛", type: "gifts" }, { text: "有人在我生日那天對我說出特別的話，我會覺得被愛", type: "words" }] },
+            { id: 23, options: [{ text: "有人送我禮物，我就知道他有想到我", type: "gifts" }, { text: "有人幫我做(家)事，我會覺得被愛", type: "service" }] },
+            { id: 24, options: [{ text: "我很感激有人耐心聽我說話而且不插嘴", type: "time" }, { text: "我很感激有人記得某個特別日子並且送我禮物", type: "gifts" }] },
+            { id: 25, options: [{ text: "我喜歡知道我所愛的人因為關心我，所以幫我做(家)事", type: "service" }, { text: "我喜歡和我心目中有特殊地位的人一起去旅行", type: "time" }] },
+            { id: 26, options: [{ text: "我喜歡和最親近的人親吻(有身體接觸)", type: "touch" }, { text: "有人不為了特別理由而送我禮物，我會覺得很開心", type: "gifts" }] },
+            { id: 27, options: [{ text: "我喜歡聽到有人向我表示感謝", type: "words" }, { text: "與人交談時，我喜歡對方注視我的眼睛", type: "time" }] },
+            { id: 28, options: [{ text: "朋友或者所愛的人所送的禮物，我會特別珍惜", type: "gifts" }, { text: "朋友和所愛的人碰觸我的身體，那感覺很好", type: "touch" }] },
+            { id: 29, options: [{ text: "有人熱心做我所要求的事，我會覺得被愛", type: "service" }, { text: "聽到別人對我表示感激，我會覺得被愛", type: "words" }] },
+            { id: 30, options: [{ text: "我每天都需要身體的接觸", type: "touch" }, { text: "我每天都需要肯定的言詞", type: "words" }] }
+        ];
+
+        // 類型與圖片對照
+        const resultsData = {
+            service: { 
+                title: '小幫手型：服務的行動', 
+                description: '你認為「行動勝於一切」。對你來說，愛就是對方為你做的大小事。就像一個貼心的小幫手，總是在別人需要時伸出援手，用實際行動解決問題。',
+                imgName: 'result_service.png' 
+            },
+            time: { 
+                title: '探險家型：精心的時刻', 
+                description: '你最重視的是兩人共度的時光。對你來說，愛意味著對方願意放下一切，專注地陪伴你。這種不被干擾的相處，是你感受到愛的最重要方式。',
+                imgName: 'result_time.png' 
+            },
+            words: { 
+                title: '詩人型：肯定的言詞', 
+                description: '言語對你具有強大的力量。一句真誠的讚美、溫柔的鼓勵，或是直接的「我愛你」，都能讓你感到被愛與肯定。',
+                imgName: 'result_words.png' 
+            },
+            gifts: { 
+                title: '收藏家型：接受禮物', 
+                description: '你將禮物視為愛意的具體象徵。一份精心挑選、能送到心坎裡的禮物，會讓你感覺自己被深刻地理解與珍惜。',
+                imgName: 'result_gifts.png' 
+            },
+            touch: { 
+                title: '貓咪型：身體的接觸', 
+                description: '身體的接觸是你感受愛的主要方式。一個牽手、一個擁抱、或只是輕輕的拍背，這些溫暖的接觸都能讓你感到安心與連結。',
+                imgName: 'result_touch.png' 
+            }
+        };
+
+        const doraCharacters = {
+            words: "靜香（最會傾聽與讚美）",
+            gifts: "小夫（最愛送禮與炫耀）",
+            service: "胖虎（嘴硬但常默默幫忙）",
+            time: "大雄（最喜歡陪伴與被陪）",
+            touch: "哆啦A夢（擁抱與照顧大雄）",
+        };
+
+        const adviceMap = {
+            words: ["多表達你的愛", "記得說謝謝和鼓勵對方"],
+            gifts: ["用小驚喜傳達你的心意", "禮物不在貴重，而在用心"],
+            service: ["主動幫忙對方的事務", "實際行動比言語更能打動人"],
+            time: ["安排專屬相處時光", "把手機放下，全心陪伴"],
+            touch: ["多擁抱與肢體互動", "用身體語言傳達愛"],
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { words: 0, gifts: 0, service: 0, time: 0, touch: 0 };
+        let radarChartInstance = null;
+
+        function showScreen(screenId) {
+            screens.forEach(screen => screen.classList.toggle('active', screen.id === screenId));
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            scores = { words: 0, gifts: 0, service: 0, time: 0, touch: 0 };
+            showQuestion();
+            showScreen('quiz-screen');
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            questionText.textContent = `第 ${currentQuestionIndex + 1} 題：請選擇比較符合你的敘述`;
+            optionsContainer.innerHTML = '';
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.className = "w-full text-left option-btn font-medium py-4 px-6 rounded-xl transition duration-300 shadow-sm text-lg";
+                button.onclick = () => selectOption(option.type);
+                optionsContainer.appendChild(button);
+            });
+            updateProgressBar();
+        }
+
+        function selectOption(type) {
+            scores[type]++;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+        }
+
+        function showResult() {
+            adviceContainer.innerHTML = '';
+            showScreen('result-screen');
+
+            const highestScore = Math.max(...Object.values(scores));
+            const resultType = Object.keys(scores).find(key => scores[key] === highestScore) || Object.keys(scores)[0];
+            const result = resultsData[resultType];
+            
+            resultTitle.textContent = result.title;
+            resultDescription.textContent = result.description;
+
+            resultImage.src = result.imgName;
+            resultImage.onerror = function() {
+                this.src = `https://placehold.co/400x400/DBCFB0/5C554B?text=${resultType}`;
+            };
+
+            renderRadarChart();
+
+            const advice = adviceMap[resultType];
+            const character = doraCharacters[resultType];
+            if (advice && character) {
+                const adviceListHtml = advice.map(tip => `<li>${tip}</li>`).join('');
+                adviceContainer.innerHTML = `
+                    <div class="mt-4 p-6 bg-[#FDFCF9] rounded-xl border border-[#DBCFB0] shadow-md text-left">
+                        <h3 class="text-lg font-bold text-morandi-text mb-3 flex items-center">
+                            <span class="inline-block w-2 h-6 bg-morandi-secondary mr-2 rounded-full"></span>
+                            給你的小建議
+                        </h3>
+                        <ul class="list-disc list-inside text-base text-gray-600 mt-2 space-y-1">${adviceListHtml}</ul>
+                        <div class="text-sm text-morandi-accent mt-4 pt-4 border-t border-[#EBE6D8]">
+                            如果你是《哆啦A夢》的角色，會最像：
+                            <span class="font-bold text-morandi-secondary text-lg block mt-1">${character}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+            const dataValues = [
+                scores.words,
+                scores.time,
+                scores.gifts,
+                scores.service,
+                scores.touch
+            ];
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['肯定的言詞', '精心的時刻', '接受禮物', '服務的行動', '身體的接觸'],
+                    datasets: [{
+                        label: '得分',
+                        data: dataValues,
+                        backgroundColor: 'rgba(219, 207, 176, 0.4)',
+                        borderColor: '#B8A88A',
+                        pointBackgroundColor: '#B8A88A',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#B8A88A',
+                        borderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { display: true, color: '#EBE6D8' },
+                            grid: { color: '#EBE6D8' },
+                            suggestedMin: 0,
+                            suggestedMax: 12,
+                            pointLabels: { font: { size: 14, family: "'Noto Sans TC', sans-serif" }, color: '#5C554B' },
+                            ticks: { backdropColor: 'transparent', color: '#948B78' }
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function restartQuiz() { showScreen('start-screen'); }
+
+        startBtn.addEventListener('click', startQuiz);
+        restartIconBtn.addEventListener('click', restartQuiz);
+
+        showScreen('start-screen');
+    </script>
+</body>
+</html>
