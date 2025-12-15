@@ -1,0 +1,588 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 台南聖誕星光地圖</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Noto Sans TC", sans-serif;
+            background-color: #0f1c3f;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* --- 標題區域 --- */
+        #header {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            padding: 8px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            text-align: center;
+            border: 3px solid #c41e3a;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            color: #c41e3a;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        p.subtitle {
+            margin: 2px 0 0 0;
+            color: #2c5e1a;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        /* --- 地圖容器 --- */
+        #map {
+            height: calc(100% - 70px); /* 扣除底部 Footer 高度 */
+            width: 100%;
+            background: #cdcdcd;
+        }
+
+        /* --- 可縮放圖示說明 (Legend) --- */
+        #legend {
+            position: absolute;
+            bottom: 90px; /* 位於 Footer 上方 */
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            z-index: 1000;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 0.85rem;
+            border-left: 5px solid #c41e3a;
+            width: 180px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        /* 收合狀態 */
+        #legend.collapsed {
+            width: 140px;
+        }
+        #legend.collapsed .legend-items {
+            max-height: 0;
+            padding-bottom: 0;
+            opacity: 0;
+        }
+        #legend.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .legend-header {
+            padding: 10px 15px;
+            font-weight: bold;
+            color: #0f1c3f;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+        }
+        .legend-header:hover {
+            background: #eee;
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            color: #c41e3a;
+        }
+
+        .legend-items {
+            padding: 10px 15px;
+            max-height: 200px; /* 展開高度 */
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        .legend-icon {
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        /* --- 固定底部資訊欄 (Footer) --- */
+        #footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(15, 28, 63, 0.95); /* 深藍色背景 */
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            border-top: 3px solid #c41e3a;
+            color: #fff;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .footer-link {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .footer-link:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .copyright {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .social-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 5px;
+            display: none; /* 手機版隱藏文字 */
+        }
+        @media (min-width: 600px) {
+            .social-label { display: block; }
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.2s;
+            background: #444;
+            font-size: 1.2rem;
+        }
+        .social-btn:hover {
+            transform: scale(1.15);
+        }
+        .social-fb { background: #1877F2; }
+        .social-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .social-yt { background: #FF0000; }
+
+
+        /* --- 彈出視窗 (Popup) --- */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+        }
+        .leaflet-popup-content {
+            margin: 0;
+            width: 280px !important;
+        }
+        .popup-header {
+            background: #c41e3a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .popup-body {
+            padding: 12px 15px;
+            background: #fff;
+            color: #333;
+        }
+        .popup-desc {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            color: #444;
+        }
+        .popup-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .popup-tag {
+            background: #f0f2f5;
+            color: #555;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid #e1e4e8;
+        }
+        .popup-tag.activity {
+            background: #fff0f0;
+            color: #c41e3a;
+            border-color: #ffcccc;
+            font-weight: bold;
+        }
+        .popup-footer {
+            padding: 10px 15px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        .nav-btn {
+            display: inline-block;
+            background: #c41e3a;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .nav-btn:hover {
+            background: #a01830;
+            color: #ffffff !important;
+        }
+
+        /* --- Marker Styles --- */
+        .marker-pin {
+            width: 36px;
+            height: 36px;
+            border-radius: 50% 50% 50% 0;
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -18px 0 0 -18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid white;
+        }
+        .marker-pin i {
+            transform: rotate(45deg);
+            font-size: 1rem;
+            color: white;
+        }
+
+        .bg-red { background: #c41e3a; }
+        .bg-green { background: #2c5e1a; }
+        .bg-gold { background: #d4af37; }
+        .bg-blue { background: #0066cc; }
+
+        .pulse-ring {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(196, 30, 58, 0.4);
+            animation: pulse 2s infinite;
+            position: absolute;
+            z-index: -1;
+            transform: rotate(45deg);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* --- Snow Effect --- */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #fff;
+            user-select: none;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        /* Mobile adjust */
+        @media (max-width: 480px) {
+            #legend { bottom: 80px; right: 10px; }
+            .footer-left { max-width: 150px; }
+            .footer-link span { display: none; } /* Hide link text if too narrow, keep icon */
+            .footer-link::after { content: " 資料來源"; display: inline; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1><i class="fa-solid fa-tree" style="color:#2c5e1a;"></i> 聖誕星光 喜樂滿城</h1>
+        <p class="subtitle">TAINAN CHRISTMAS 2024</p>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- 可縮放圖示說明 -->
+    <div id="legend">
+        <div class="legend-header" onclick="toggleLegend()">
+            <span><i class="fa-solid fa-layer-group"></i> 圖示說明</span>
+            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-icon" style="color: #c41e3a;"><i class="fa-solid fa-star"></i></div>
+                <span>官方重點燈區</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="color: #2c5e1a;"><i class="fa-solid fa-church"></i></div>
+                <span>教會/教堂點燈</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="color: #d4af37;"><i class="fa-solid fa-gift"></i></div>
+                <span>百貨/商圈</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="color: #0066cc;"><i class="fa-solid fa-location-dot"></i></div>
+                <span>觀光景點</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 固定底部資訊欄 -->
+    <div id="footer-bar">
+        <div class="footer-left">
+            <a href="https://www.twtainan.net/zh-tw/event/activitydetail/7632/" target="_blank" class="footer-link">
+                <i class="fa-solid fa-circle-info"></i> <span>2024台南聖誕燈節活動官網</span>
+            </a>
+            <span class="copyright">© 2024 AI親子成長屋 彙整製作</span>
+        </div>
+        
+        <div class="footer-right">
+            <span class="social-label">AI親子成長屋</span>
+            <a href="https://www.facebook.com/profile.php?id=61579308823985" target="_blank" class="social-btn social-fb" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/aifamily0708?igsh=MXdlbzFsaTYxMDhidw%3D%3D&utm_source=qr" target="_blank" class="social-btn social-ig" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@aifamily0708" target="_blank" class="social-btn social-yt" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+    </div>
+
+    <div id="snow-container"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // 初始化地圖
+        const map = L.map('map', {
+            zoomControl: false 
+        }).setView([23.08, 120.25], 10);
+
+        // 將縮放控制項移到右上角，避免與底部 Footer 重疊
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 圖示說明縮放功能
+        function toggleLegend() {
+            const legend = document.getElementById('legend');
+            legend.classList.toggle('collapsed');
+        }
+
+        // 資料庫
+        const locations = [
+            // --- 2024 官方十大主題聖誕樹 / 重點燈區 ---
+            { name: "民治市政中心市民廣場", lat: 23.31135, lng: 120.31608, type: "main", icon: "fa-star", desc: "幸福台南．耶誕點燈", area: "新營區" },
+            { name: "新營文化中心暨綠川廊道", lat: 23.30752, lng: 120.31456, type: "main", icon: "fa-music", desc: "聖誕音樂會 & 雲之曙光", area: "新營區" },
+            { name: "臺南市立圖書館新總館", lat: 23.02456, lng: 120.23358, type: "main", icon: "fa-book", desc: "新·臺南派對：聖誕樹點燈", area: "永康區" },
+            { name: "河樂廣場", lat: 22.99351, lng: 120.19421, type: "main", icon: "fa-star", desc: "光之旅程：台南運河聖誕主燈區", area: "中西區" },
+            { name: "新光三越台南新天地", lat: 22.98708, lng: 120.19830, type: "main", icon: "fa-gift", desc: "The Light of Love：愛的光芒 (西門廣場)", area: "中西區" },
+            { name: "南紡購物中心", lat: 22.99158, lng: 120.23315, type: "main", icon: "fa-gift", desc: "POP MART 萌粒驚喜：蘋安綻Fun幸福相遇 (A2館廣場)", area: "東區" },
+            { name: "大遠百 成功店", lat: 22.99602, lng: 120.21105, type: "main", icon: "fa-gift", desc: "星光燦爛聖誕樹 (前鋒路廣場)", area: "東區" },
+            { name: "奇美博物館", lat: 22.93456, lng: 120.22602, type: "main", icon: "fa-music", desc: "奇美聖誕週末：幸福聖誕樹", area: "仁德區" },
+            { name: "MITSUI OUTLET PARK 台南", lat: 22.92425, lng: 120.28612, type: "main", icon: "fa-robot", desc: "超人力霸王：聖誕造景", area: "歸仁區" },
+            { name: "新光三越 台南小北門店", lat: 23.01185, lng: 120.20521, type: "main", icon: "fa-train", desc: "幸福列車：12米高耶誕樹與小火車", area: "北區" }, 
+
+            // --- 溪北地區 ---
+            { name: "新營長老教會", lat: 23.30512, lng: 120.31225, type: "church", area: "新營區" },
+            { name: "鹽水天主聖神堂", lat: 23.32115, lng: 120.26620, type: "church", desc: "著名中式宮殿風格天主堂", area: "鹽水區" },
+            { name: "佳里教會", lat: 23.16620, lng: 120.17750, type: "church", area: "佳里區" },
+            { name: "麻豆恩典之家", lat: 23.18550, lng: 120.24880, type: "church", area: "麻豆區" },
+            { name: "漚汪長老教會", lat: 23.19520, lng: 120.14560, type: "church", area: "將軍區" },
+            { name: "蘭都觀光工廠", lat: 23.23560, lng: 120.33520, type: "spot", desc: "OrchidCity 蘭花聖誕佈置", area: "六甲區" },
+
+            // --- 山區與南科周邊 ---
+            { name: "善化聖家天主堂", lat: 23.13320, lng: 120.29450, type: "church", area: "善化區" },
+            { name: "南科贊美酒店", lat: 23.10950, lng: 120.28420, type: "spot", icon: "fa-hotel", desc: "心之所向：湖畔聖誕裝置", area: "善化區" },
+            { name: "玉井基督長老教會", lat: 23.12450, lng: 120.46080, type: "church", area: "玉井區" },
+            { name: "山上教會", lat: 23.10250, lng: 120.35520, type: "church", area: "山上區" },
+            { name: "左鎮基督長老教會", lat: 23.05580, lng: 120.40850, type: "church", area: "左鎮區" },
+            { name: "新化基督長老教會", lat: 23.03650, lng: 120.30580, type: "church", area: "新化區" },
+            { name: "新市天主堂", lat: 23.07850, lng: 120.29350, type: "church", area: "新市區" },
+
+            // --- 永康區 ---
+            { name: "永康法蒂瑪聖母天主堂", lat: 23.01020, lng: 120.24550, type: "church", area: "永康區" },
+            { name: "探索教育公園", lat: 23.01850, lng: 120.25020, type: "spot", area: "永康區" },
+            { name: "小東聖誕市集(光明公園)", lat: 22.99920, lng: 120.23550, type: "main", icon: "fa-store", area: "永康區" },
+
+            // --- 市中心 ---
+            { name: "太平境馬雅各紀念教會", lat: 22.99280, lng: 120.20480, type: "church", desc: "百年歷史白色教堂", area: "中西區" },
+            { name: "看西街教會", lat: 22.99760, lng: 120.19720, type: "church", desc: "仿聖保羅大教堂圓頂建築", area: "中西區" },
+            { name: "台南民族路長老教會", lat: 22.99710, lng: 120.20750, type: "church", area: "中西區" },
+            { name: "開山路中華聖母主教座堂", lat: 22.98820, lng: 120.20710, type: "church", desc: "中國宮殿式天主堂", area: "中西區" },
+            { name: "林百貨", lat: 22.99180, lng: 120.20260, type: "spot", desc: "古蹟百貨：聖誕夜景", area: "中西區" },
+            { name: "新光三越 台南中山店", lat: 22.99550, lng: 120.21120, type: "mall", icon: "fa-gift", area: "中西區" },
+            { name: "台南神召會", lat: 23.00520, lng: 120.21050, type: "church", area: "北區" },
+            { name: "大光教會", lat: 23.00850, lng: 120.21580, type: "church", area: "北區" },
+            { name: "台南南聖教會", lat: 22.98550, lng: 120.24050, type: "church", area: "東區" },
+            { name: "藍晒圖文創園區", lat: 22.98620, lng: 120.19750, type: "spot", desc: "文創聖誕市集與佈置", area: "南區" },
+            { name: "安平靈糧堂", lat: 22.99850, lng: 120.17550, type: "church", area: "安平區" },
+            { name: "安平教會", lat: 23.00050, lng: 120.16250, type: "church", area: "安平區" },
+            { name: "台南聖教會", lat: 22.99050, lng: 120.18050, type: "church", area: "安平區" },
+
+            // --- 仁德/歸仁 ---
+            { name: "虹泰水凝膠世界", lat: 22.97550, lng: 120.24580, type: "spot", desc: "觀光工廠聖誕佈置", area: "仁德區" },
+            { name: "奇美食品幸福工廠", lat: 22.93550, lng: 120.22550, type: "spot", area: "仁德區" },
+            { name: "歸仁教會", lat: 22.96650, lng: 120.29450, type: "church", area: "歸仁區" }
+        ];
+
+        function createCustomIcon(location) {
+            let className = '';
+            let iconClass = location.icon || 'fa-map-marker-alt';
+            let isPulse = false;
+
+            switch(location.type) {
+                case 'main': className = 'bg-red'; isPulse = true; if (!location.icon) iconClass = 'fa-star'; break;
+                case 'church': className = 'bg-green'; if (!location.icon) iconClass = 'fa-church'; break;
+                case 'mall': className = 'bg-gold'; if (!location.icon) iconClass = 'fa-gift'; break;
+                case 'spot': className = 'bg-blue'; break;
+            }
+
+            if (location.type === 'church') iconClass = 'fa-church';
+
+            const pulseHtml = isPulse ? '<span class="pulse-ring"></span>' : '';
+            
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class='marker-pin ${className}'>
+                        ${pulseHtml}
+                        <i class='fa-solid ${iconClass}'></i>
+                       </div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 42],
+                popupAnchor: [0, -40]
+            });
+        }
+
+        locations.forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lng], {
+                icon: createCustomIcon(loc)
+            }).addTo(map);
+
+            const typeLabel = {
+                'main': '🎄 重點活動',
+                'church': '⛪ 教會點燈',
+                'mall': '🎁 百貨商圈',
+                'spot': '✨ 觀光景點'
+            }[loc.type];
+
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
+
+            const popupContent = `
+                <div class="popup-header">
+                    <span>${loc.name}</span>
+                    <i class="fa-solid ${loc.type === 'church' ? 'fa-church' : 'fa-star'}" style="opacity:0.8"></i>
+                </div>
+                <div class="popup-body">
+                    <div class="popup-tags">
+                        <span class="popup-tag ${loc.type === 'main' ? 'activity' : ''}">${typeLabel}</span>
+                        ${loc.area ? `<span class="popup-tag">${loc.area}</span>` : ''}
+                    </div>
+                    <div class="popup-desc">
+                        ${loc.desc ? loc.desc : `位於${loc.area || '台南'}的聖誕節慶亮點，歡迎蒞臨感受節日氣氛。`}
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <a href="${googleMapUrl}" target="_blank" class="nav-btn">
+                        <i class="fa-solid fa-location-arrow"></i> 導航去
+                    </a>
+                </div>
+            `;
+
+            marker.bindPopup(popupContent);
+        });
+
+        function createSnow() {
+            const container = document.getElementById('snow-container');
+            const snowflakesCount = window.innerWidth < 768 ? 25 : 50; 
+
+            for (let i = 0; i < snowflakesCount; i++) {
+                const snow = document.createElement('div');
+                snow.className = 'snowflake';
+                snow.innerHTML = '❄';
+                snow.style.left = Math.random() * 100 + '%';
+                snow.style.animation = `fall ${(Math.random() * 5 + 5)}s linear infinite`;
+                snow.style.animationDelay = -Math.random() * 10 + 's';
+                snow.style.opacity = Math.random() * 0.7 + 0.3;
+                snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                container.appendChild(snow);
+            }
+            
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fall {
+                    0% { transform: translateY(-10vh) translateX(-10px) rotate(0deg); }
+                    100% { transform: translateY(100vh) translateX(10px) rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        createSnow();
+    </script>
+</body>
+</html>
