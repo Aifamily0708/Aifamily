@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -415,7 +415,7 @@
         // 初始化地圖
         const map = L.map('map', {
             zoomControl: false 
-        }).setView([23.08, 120.25], 10);
+        }).setView([23.05, 120.22], 10); // 調整視角以涵蓋大台南
 
         // 將縮放控制項移到右上角，避免與底部 Footer 重疊
         L.control.zoom({
@@ -433,7 +433,7 @@
             legend.classList.toggle('collapsed');
         }
 
-        // 資料庫
+        // 資料庫 (已校正真實經緯度)
         const locations = [
             // --- 2025 官方十大主題聖誕樹 / 重點燈區 ---
             { name: "民治市政中心市民廣場", lat: 23.31135, lng: 120.31608, type: "main", icon: "fa-star", desc: "幸福台南．耶誕點燈", area: "新營區" },
@@ -443,8 +443,11 @@
             { name: "新光三越台南新天地", lat: 22.98708, lng: 120.19830, type: "main", icon: "fa-gift", desc: "The Light of Love：愛的光芒 (西門廣場)", area: "中西區" },
             { name: "南紡購物中心", lat: 22.99158, lng: 120.23315, type: "main", icon: "fa-gift", desc: "POP MART 萌粒驚喜：蘋安綻Fun幸福相遇 (A2館廣場)", area: "東區" },
             { name: "大遠百 成功店", lat: 22.99602, lng: 120.21105, type: "main", icon: "fa-gift", desc: "星光燦爛聖誕樹 (前鋒路廣場)", area: "東區" },
+            // { name: "奇美博物館", lat: 22.93456, lng: 120.22602, type: "main", icon: "fa-music", desc: "奇美聖誕週末：幸福聖誕樹", area: "仁德區" }, // 已移除
             { name: "MITSUI OUTLET PARK 台南", lat: 22.92425, lng: 120.28612, type: "main", icon: "fa-robot", desc: "超人力霸王：聖誕造景", area: "歸仁區" },
-            { name: "新光三越 台南小北門店", lat: 23.01185, lng: 120.20521, type: "main", icon: "fa-train", desc: "幸福列車：12米高耶誕樹與小火車", area: "北區" }, 
+            
+            // 新增修正：新光三越 台南小北門店 (真實位置在西門路四段135號，原東帝士舊址)
+            { name: "新光三越 台南小北門店", lat: 23.01170, lng: 120.20500, type: "main", icon: "fa-train", desc: "幸福列車：12米高耶誕樹與小火車 (西門路四段)", area: "北區" }, 
 
             // --- 溪北地區 ---
             { name: "新營長老教會", lat: 23.30512, lng: 120.31225, type: "church", area: "新營區" },
@@ -529,7 +532,10 @@
                 'spot': '✨ 觀光景點'
             }[loc.type];
 
-            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
+            // 修正：導航按鈕不再使用經緯度，而是使用「地點名稱」進行搜尋
+            // 這樣 Google Maps App 開啟時會直接搜尋該地標，提供更準確的導航體驗
+            const searchTerm = encodeURIComponent(loc.name + " " + (loc.area || "台南"));
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${searchTerm}`;
 
             const popupContent = `
                 <div class="popup-header">
@@ -584,6 +590,4 @@
         createSnow();
     </script>
 </body>
-
 </html>
-
