@@ -9,7 +9,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         body, html {
@@ -22,54 +22,120 @@
             overflow: hidden;
         }
 
-        /* --- 標題區域 --- */
+        /* --- 標題區域 (聖誕風格) --- */
         #header {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
-            padding: 8px 20px;
+            background: linear-gradient(to bottom, #d41e3a, #8a0c1e);
+            border: 2px solid #ffd700;
+            padding: 10px 30px;
             border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 
+                0 6px 0 #5e0815,
+                0 10px 20px rgba(0,0,0,0.4),
+                inset 0 0 15px rgba(255, 215, 0, 0.4);
+            min-width: 280px;
             text-align: center;
-            border: 3px solid #c41e3a;
-            min-width: 260px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
         }
+
+        #header:hover {
+            transform: translateX(-50%) translateY(2px);
+        }
+
+        #header::before, #header::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            width: 2px;
+            height: 15px;
+            background: #ffd700;
+            z-index: -1;
+        }
+        #header::before { left: 40px; }
+        #header::after { right: 40px; }
 
         h1 {
             margin: 0;
-            color: #c41e3a;
-            font-size: 1.2rem;
+            color: #fff;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 0 2px 0 #8a0c1e, 0 4px 5px rgba(0,0,0,0.3);
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        h1 i {
+            color: #ffd700;
+            filter: drop-shadow(0 2px 0 rgba(0,0,0,0.3));
+            font-size: 1.2rem;
         }
 
         p.subtitle {
-            margin: 2px 0 0 0;
-            color: #2c5e1a;
+            margin: 6px 0 0 0;
+            color: #ffd700;
             font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            border-top: 1px solid rgba(255, 215, 0, 0.4);
+            padding-top: 4px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            font-family: sans-serif; 
         }
 
         /* --- 地圖容器 --- */
         #map {
-            height: calc(100% - 70px); /* 扣除底部 Footer 高度 */
+            height: calc(100% - 70px);
             width: 100%;
             background: #cdcdcd;
+        }
+
+        /* --- 高雄地圖導引按鈕 --- */
+        #kh-map-btn {
+            position: absolute;
+            bottom: 90px;
+            left: 15px;
+            z-index: 1000;
+            background: #c41e3a;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        #kh-map-btn:hover {
+            transform: translateY(-3px);
+            background: #a01830;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        #kh-map-btn i {
+            color: #ffd700;
         }
 
         /* --- 可縮放圖示說明 (Legend) --- */
         #legend {
             position: absolute;
-            bottom: 90px; /* 位於 Footer 上方 */
+            bottom: 90px; 
             right: 15px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 12px;
@@ -83,7 +149,6 @@
             overflow: hidden;
         }
 
-        /* 收合狀態 */
         #legend.collapsed {
             width: 140px;
         }
@@ -117,7 +182,7 @@
 
         .legend-items {
             padding: 10px 15px;
-            max-height: 200px; /* 展開高度 */
+            max-height: 200px;
             transition: max-height 0.3s ease, opacity 0.3s ease;
             opacity: 1;
         }
@@ -144,7 +209,7 @@
             left: 0;
             width: 100%;
             height: 70px;
-            background: rgba(15, 28, 63, 0.95); /* 深藍色背景 */
+            background: rgba(15, 28, 63, 0.98);
             backdrop-filter: blur(5px);
             z-index: 2000;
             display: flex;
@@ -191,7 +256,7 @@
             font-size: 0.9rem;
             font-weight: bold;
             margin-right: 5px;
-            display: none; /* 手機版隱藏文字 */
+            display: none; 
         }
         @media (min-width: 600px) {
             .social-label { display: block; }
@@ -217,8 +282,7 @@
         .social-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
         .social-yt { background: #FF0000; }
 
-
-        /* --- 彈出視窗 (Popup) --- */
+        /* --- Popup Styles --- */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
             padding: 0;
@@ -345,23 +409,35 @@
             pointer-events: none;
             z-index: 9999;
         }
-        /* Mobile adjust */
         @media (max-width: 480px) {
             #legend { bottom: 80px; right: 10px; }
+            #kh-map-btn { bottom: 80px; left: 10px; font-size: 0.8rem; padding: 8px 12px; }
             .footer-left { max-width: 150px; }
-            .footer-link span { display: none; } /* Hide link text if too narrow, keep icon */
+            .footer-link span { display: none; }
             .footer-link::after { content: " 資料來源"; display: inline; }
+            
+            #header {
+                padding: 8px 20px;
+                min-width: 240px;
+            }
+            h1 { font-size: 1.2rem; }
+            p.subtitle { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
     <div id="header">
-        <h1><i class="fa-solid fa-tree" style="color:#2c5e1a;"></i> 聖誕星光 喜樂滿城</h1>
+        <h1><i class="fa-solid fa-tree"></i> 聖誕星光 喜樂滿城 <i class="fa-solid fa-star"></i></h1>
         <p class="subtitle">TAINAN CHRISTMAS 2025</p>
     </div>
 
     <div id="map"></div>
+
+    <!-- 高雄地圖按鈕 -->
+    <a href="https://aifamily0708.github.io/Aifamily/Christmas_KH.html" target="_blank" id="kh-map-btn">
+        <i class="fa-solid fa-map-location-dot"></i> <span>高雄聖誕地圖</span>
+    </a>
 
     <!-- 可縮放圖示說明 -->
     <div id="legend">
@@ -415,9 +491,8 @@
         // 初始化地圖
         const map = L.map('map', {
             zoomControl: false 
-        }).setView([23.05, 120.22], 10); // 調整視角以涵蓋大台南
+        }).setView([23.08, 120.24], 11); // 調整視角
 
-        // 將縮放控制項移到右上角，避免與底部 Footer 重疊
         L.control.zoom({
             position: 'topright'
         }).addTo(map);
@@ -433,7 +508,7 @@
             legend.classList.toggle('collapsed');
         }
 
-        // 資料庫 (已校正真實經緯度)
+        // 資料庫
         const locations = [
             // --- 2025 官方十大主題聖誕樹 / 重點燈區 ---
             { name: "民治市政中心市民廣場", lat: 23.31135, lng: 120.31608, type: "main", icon: "fa-star", desc: "幸福台南．耶誕點燈", area: "新營區" },
@@ -443,11 +518,15 @@
             { name: "新光三越台南新天地", lat: 22.98708, lng: 120.19830, type: "main", icon: "fa-gift", desc: "The Light of Love：愛的光芒 (西門廣場)", area: "中西區" },
             { name: "南紡購物中心", lat: 22.99158, lng: 120.23315, type: "main", icon: "fa-gift", desc: "POP MART 萌粒驚喜：蘋安綻Fun幸福相遇 (A2館廣場)", area: "東區" },
             { name: "大遠百 成功店", lat: 22.99602, lng: 120.21105, type: "main", icon: "fa-gift", desc: "星光燦爛聖誕樹 (前鋒路廣場)", area: "東區" },
-            // { name: "奇美博物館", lat: 22.93456, lng: 120.22602, type: "main", icon: "fa-music", desc: "奇美聖誕週末：幸福聖誕樹", area: "仁德區" }, // 已移除
             { name: "MITSUI OUTLET PARK 台南", lat: 22.92425, lng: 120.28612, type: "main", icon: "fa-robot", desc: "超人力霸王：聖誕造景", area: "歸仁區" },
-            
-            // 新增修正：新光三越 台南小北門店 (真實位置在西門路四段135號，原東帝士舊址)
             { name: "新光三越 台南小北門店", lat: 23.01170, lng: 120.20500, type: "main", icon: "fa-train", desc: "幸福列車：12米高耶誕樹與小火車 (西門路四段)", area: "北區" }, 
+
+            // --- 2025 好時光聖誕．攜手愛無限 (教會活動) ---
+            { name: "北區教會 (大道新城)", lat: 23.0075, lng: 120.2205, type: "church", desc: "<b>歡樂聖誕小市集</b><br>時間：15:30–17:00", area: "北區" },
+            { name: "南區教會 (金華公園)", lat: 22.98036, lng: 120.19013, type: "church", desc: "<b>聖誕在金華．攜手愛無限</b><br>時間：12/21 (日) 14:00–16:00", area: "南區" },
+            { name: "新化教會 (平安夜活動)", lat: 23.0360, lng: 120.3055, type: "church", desc: "<b>幸福聖誕節</b><br>時間：12/24 (三) 18:00–21:00", area: "新化區" },
+            { name: "大灣教會", lat: 23.0045, lng: 120.2635, type: "church", desc: "<b>好時光聖誕市集</b><br>時間：12/25 (四) 14:00–17:00", area: "永康區" },
+            { name: "麻豆教會 (總爺藝文中心)", lat: 23.18562, lng: 120.26907, type: "church", desc: "<b>野餐見證音樂會</b><br>時間：12/25 (四) 14:00–16:30", area: "麻豆區" },
 
             // --- 溪北地區 ---
             { name: "新營長老教會", lat: 23.30512, lng: 120.31225, type: "church", area: "新營區" },
@@ -532,10 +611,17 @@
                 'spot': '✨ 觀光景點'
             }[loc.type];
 
-            // 修正：導航按鈕不再使用經緯度，而是使用「地點名稱」進行搜尋
-            // 這樣 Google Maps App 開啟時會直接搜尋該地標，提供更準確的導航體驗
-            const searchTerm = encodeURIComponent(loc.name + " " + (loc.area || "台南"));
-            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${searchTerm}`;
+            // 修正：導航按鈕使用「地點名稱」進行搜尋
+            // 如果地點名稱包含括號 (例如 "北區教會 (大道新城)")，我們優先搜尋括號內的知名地標，或組合名稱
+            let searchTerm = loc.name;
+            // 簡單正則：如果名稱中有括號，例如 "北區教會 (大道新城)"，嘗試提取括號內容作為導航關鍵字
+            const match = loc.name.match(/\(([^)]+)\)/);
+            if (match) {
+                // 如果有括號，搜尋 "括號內容 + 區域名稱" 比較準確，例如 "大道新城 北區"
+                searchTerm = match[1]; 
+            }
+            
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTerm + " " + (loc.area || "台南"))}`;
 
             const popupContent = `
                 <div class="popup-header">
