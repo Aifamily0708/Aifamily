@@ -2,13 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2025 高雄聖誕跨年地圖 - AI親子成長屋</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -40,7 +37,10 @@
                 0 8px 25px rgba(0,0,0,0.6), /* 外部深陰影 */
                 inset 0 0 15px rgba(255, 215, 0, 0.3); /* 內部金色光暈 */
             text-align: center;
-            min-width: 280px;
+            /* RWD 修改: 寬度調整為彈性 */
+            width: 90%;
+            max-width: 400px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -62,10 +62,12 @@
             font-size: 1.35rem;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             /* 立體文字效果：金色陰影 */
             text-shadow: 2px 2px 0px #b8860b, 0 0 10px rgba(255, 215, 0, 0.5);
             font-weight: 800;
+            white-space: nowrap;
         }
 
         p.subtitle {
@@ -183,6 +185,8 @@
             flex-direction: column;
             gap: 5px;
             font-size: 0.8rem;
+            /* RWD: 防止文字過長擠壓右側 */
+            flex: 1; 
         }
         
         .footer-link {
@@ -192,6 +196,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            white-space: nowrap;
         }
         .footer-link:hover {
             color: #fff;
@@ -201,12 +206,14 @@
         .copyright {
             color: #888;
             font-size: 0.75rem;
+            white-space: nowrap;
         }
 
         .footer-right {
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-shrink: 0; /* RWD: 防止按鈕被壓縮 */
         }
         
         .social-label {
@@ -247,9 +254,17 @@
             overflow: hidden;
             box-shadow: 0 3px 14px rgba(0,0,0,0.4);
         }
+        /* RWD: Popup 內容寬度自適應 */
         .leaflet-popup-content {
             margin: 0;
-            width: 300px !important; /* 加寬一點以容納詳細文字 */
+            width: auto !important;
+            min-width: 260px;
+            max-width: 300px;
+        }
+        @media (max-width: 360px) {
+            .leaflet-popup-content {
+                max-width: 85vw; /* 極小螢幕適應 */
+            }
         }
         .popup-header {
             background: #c41e3a;
@@ -370,14 +385,46 @@
             pointer-events: none;
             z-index: 9999;
         }
-        /* Mobile adjust */
-        @media (max-width: 480px) {
-            #legend { bottom: 80px; right: 10px; }
-            .footer-left { max-width: 150px; }
-            .footer-link span { display: none; } /* Hide link text if too narrow, keep icon */
-            .footer-link::after { content: " 旅遊網"; display: inline; }
+        
+        /* --- RWD Media Queries --- */
+        @media (max-width: 600px) {
+            #header {
+                padding: 10px 20px;
+            }
+            h1 {
+                font-size: 1.15rem;
+            }
+            
+            #legend { 
+                bottom: 80px; 
+                right: 10px; 
+            }
+            
+            /* 手機版調整：確保底部資訊不被切掉，圖示按鈕保持大小 */
+            .footer-left { 
+                max-width: 60%; 
+            }
+            .footer-link span { 
+                display: none; 
+            } /* 螢幕過窄時隱藏文字，保留圖示 */
+            .footer-link::after { 
+                content: " 旅遊網"; 
+                display: inline; 
+                font-size: 0.85rem;
+            }
+            .copyright {
+                font-size: 0.65rem;
+                transform: scale(0.95);
+                transform-origin: left;
+            }
+            
             /* 手機版調整台南地圖按鈕位置，避免遮擋 */
-            #TN-map-btn { bottom: 160px !important; left: 10px !important; } 
+            #TN-map-btn { 
+                bottom: 140px !important; /* 稍微降低高度，避免太高 */
+                left: 10px !important; 
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            } 
         }
 
         /* --- 台南地圖導引按鈕 --- */
@@ -419,14 +466,12 @@
         <p class="subtitle">KAOHSIUNG CHRISTMAS 2026</p>
     </div>
 
-    <!-- 台南聖誕地圖導引按鈕 -->
-    <a href="https://script.google.com/macros/s/AKfycbzCA4zuQoeyqcaY5FREhshWb6CadQgF_ypKeIaGuOQZomL68mIoTU3GNjM1YlkUJKUlAQ/exec?id=TN" target="_blank">
+    <a href="https://script.google.com/macros/s/AKfycbzCA4zuQoeyqcaY5FREhshWb6CadQgF_ypKeIaGuOQZomL68mIoTU3GNjM1YlkUJKUlAQ/exec?id=TN" target="_blank" id="TN-map-btn">
         <i class="fa-solid fa-map-location-dot"></i> 前往台南聖誕地圖
     </a>
 
     <div id="map"></div>
 
-    <!-- 可縮放圖示說明 -->
     <div id="legend">
         <div class="legend-header" onclick="toggleLegend()">
             <span><i class="fa-solid fa-layer-group"></i> 圖示說明</span>
@@ -448,7 +493,6 @@
         </div>
     </div>
 
-    <!-- 固定底部資訊欄 -->
     <div id="footer-bar">
         <div class="footer-left">
             <a href="https://khh.travel/" target="_blank" class="footer-link">
@@ -467,7 +511,6 @@
 
     <div id="snow-container"></div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
