@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沖繩親子全家同樂行程表</title>
+    
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 載入 Babel (用於編譯 JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 設定 Import Map (讓瀏覽器知道去哪裡抓 React 和 Lucide) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+        }
+    }
+    </script>
+
+    <style>
+        /* 自定義捲軸樣式，讓橫向捲動更美觀 */
+        ::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            Plane, Car, ShoppingBag, Baby, MapPin, Utensils, Navigation, 
+            Ship, Trees, Zap, Laptop, Sun, Star, Info, Clock, AlertCircle, 
+            Map, Facebook, Instagram, Youtube, Image as ImageIcon, X
+        } from 'lucide-react';
+
+        const ItineraryApp = () => {
+            // 狀態：控制地圖模態視窗 (模擬開啟地圖)
+            const [activeMap, setActiveMap] = useState(null);
+
+            const getMapLink = (query) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+
+            // 地圖資料 (模擬 5 張不同風格地圖)
+            const mapStyles = [
+                { id: 1, name: "可愛手繪風", color: "bg-pink-100 text-pink-700", desc: "適合小朋友閱讀的童趣地圖" },
+                { id: 2, name: "詳細路網風", color: "bg-blue-100 text-blue-700", desc: "包含所有公車與電車路線" },
+                { id: 3, name: "景點插畫風", color: "bg-green-100 text-green-700", desc: "主要景點都有精美插圖" },
+                { id: 4, name: "美食攻略風", color: "bg-orange-100 text-orange-700", desc: "標註了所有必吃美食位置" },
+                { id: 5, name: "極簡設計風", color: "bg-slate-100 text-slate-700", desc: "清晰易懂的現代風格" },
+            ];
+
+            const itinerary = [
+                {
+                    day: "Day 1",
+                    date: "12/20 (週六)",
+                    title: "抵達沖繩 & 飯店休息",
+                    highlight: "養精蓄銳",
+                    activities: [
+                        {
+                            time: "18:30",
+                            title: "抵達那霸機場 (OKA)",
+                            desc: "領取行李，感受沖繩暖風。",
+                            type: "transport",
+                            query: "Naha Airport",
+                            icon: <Plane size={18} />
+                        },
+                        {
+                            time: "19:30",
+                            title: "前往飯店 Check-in",
+                            desc: "搭乘單軌電車或計程車前往飯店放行李。",
+                            type: "transport",
+                            query: "Hotel Hinode Okinawa", 
+                            icon: <MapPin size={18} />
+                        },
+                        {
+                            time: "20:30",
+                            title: "悠閒晚餐 & 便利商店",
+                            desc: "在飯店附近簡單吃，去 Lawsom/全家買明天早餐與水，早點休息。",
+                            type: "food",
+                            query: "Kokusai Dori",
+                            icon: <Utensils size={18} />
+                        }
+                    ]
+                },
+                {
+                    day: "Day 2",
+                    date: "12/21 (週日)",
+                    title: "南部：水族館 & 購物",
+                    highlight: "iias 一站滿足",
+                    activities: [
+                        {
+                            time: "09:30",
+                            title: "DMM Kariyushi 水族館",
+                            desc: "位於 iias 商場 2F。聲光效果好，可以近距離看企鵝、樹懶，適合小小孩。",
+                            type: "sightseeing",
+                            query: "DMM Kariyushi Aquarium",
+                            icon: <Baby size={18} />
+                        },
+                        {
+                            time: "11:30",
+                            title: "午餐：iias 美食街",
+                            desc: "商場內解決午餐，選擇多樣，有兒童座椅方便用餐。",
+                            type: "food",
+                            query: "iias Okinawa Toyosaki Food Court",
+                            icon: <Utensils size={18} />
+                        },
+                        {
+                            time: "13:00",
+                            title: "iias 購物休閒",
+                            desc: "商場非常好逛，媽媽可逛 UNIQLO/GU，爸爸可以逛 Kojima x Bic Camera 電器行。",
+                            type: "shopping",
+                            tags: ["UNIQLO", "GU", "Kojima"],
+                            query: "iias Okinawa Toyosaki",
+                            icon: <ShoppingBag size={18} />
+                        },
+                        {
+                            time: "15:00",
+                            title: "美麗 SUN 海灘 (Chura Sun)",
+                            desc: "就在商場旁邊，步行可達。全家踏浪、玩沙、看飛機起降。",
+                            type: "park",
+                            query: "Chura Sun Beach",
+                            icon: <Sun size={18} />
+                        },
+                        {
+                            time: "17:30",
+                            title: "返回飯店休息",
+                            desc: "搭車返回那霸市區飯店。",
+                            type: "transport",
+                            query: "Naha City",
+                            icon: <Car size={18} />
+                        }
+                    ]
+                },
+                {
+                    day: "Day 3",
+                    date: "12/22 (週一)",
+                    title: "那霸市區：看魚 & 溜滑梯",
+                    highlight: "玻璃船 + 國際通逛街",
+                    activities: [
+                        {
+                            time: "09:00",
+                            title: "那霸港 玻璃船",
+                            desc: "搭乘 Orca 號或是類似玻璃底船，不用下水也能看海底魚群。",
+                            type: "sightseeing",
+                            query: "Naha Wharf Terminal Glass Boat",
+                            icon: <Ship size={18} />
+                        },
+                        {
+                            time: "11:30",
+                            title: "午餐 & 移動",
+                            desc: "在港口附近或前往奧武山公園附近用餐。",
+                            type: "food",
+                            query: "Naha Port",
+                            icon: <Utensils size={18} />
+                        },
+                        {
+                            time: "13:30",
+                            title: "奧武山公園",
+                            desc: "★ 必玩：超長滾輪溜滑梯！也有適合幼兒的小遊具，放電好去處。",
+                            type: "park",
+                            query: "Onoyama Park",
+                            icon: <Trees size={18} />
+                        },
+                        {
+                            time: "16:30",
+                            title: "國際通 散策",
+                            desc: "逛唐吉訶德、買伴手禮、吃 Blue Seal 冰淇淋。感受沖繩熱鬧氣氛。",
+                            type: "shopping",
+                            query: "Kokusai Dori",
+                            icon: <ShoppingBag size={18} />
+                        },
+                        {
+                            time: "18:30",
+                            title: "晚餐：國際通",
+                            desc: "找間有現場民謠演奏的居酒屋，或暖暮拉麵。",
+                            type: "food",
+                            query: "Kokusai Dori Dinner",
+                            icon: <Utensils size={18} />
+                        }
+                    ]
+                },
+                {
+                    day: "Day 4",
+                    date: "12/23 (週二)",
+                    title: "浦添一日遊：公園 & 購物",
+                    highlight: "超長溜滑梯 + 敘敘苑燒肉",
+                    activities: [
+                        {
+                            time: "09:00",
+                            title: "沖繩世界文化王國 (玉泉洞)",
+                            desc: "位於南部。建議停留 3-5 小時。必看鐘乳石洞與太鼓舞表演。",
+                            type: "sightseeing",
+                            query: "Okinawa World",
+                            icon: <MapPin size={18} />,
+                            details: {
+                                tips: [
+                                    { title: "看表演", text: "入園先確認「超級太鼓隊」和「毒蛇秀」時間。" },
+                                    { title: "順動線", text: "玉泉洞入口進 ➞ 走到底搭電梯 ➞ 王國村/表演場 ➞ 毒蛇公園 (單向通行)。" },
+                                    { title: "穿好鞋", text: "洞內潮濕濕滑，請穿好走的鞋。恆溫 21°C 很涼爽。" }
+                                ],
+                                times: [
+                                    { label: "玉泉洞", time: "40-60分", sub: "全長890公尺，景色壯觀適合拍照。" },
+                                    { label: "王國村", time: "40-60分", sub: "若參加DIY體驗需額外加時。" },
+                                    { label: "太鼓舞", time: "約30分", sub: "必看！建議開演前15分鐘佔位 (常見場次 10:30, 12:30, 14:30)。" },
+                                    { label: "毒蛇園", time: "30-40分", sub: "毒蛇秀表演與參觀。" }
+                                ]
+                            }
+                        },
+                        {
+                            time: "12:30", 
+                            title: "午餐：沖繩蕎麥麵 (蕎蕎蕎)",
+                            desc: "★ 指定行程。品嚐道地的沖繩風味蕎麥麵，吃飽才有力氣玩公園！",
+                            type: "food",
+                            customLink: "https://maps.app.goo.gl/iTdk6TjYC6rmURZD8?g_st=ipc",
+                            query: "Okinawa Soba", 
+                            icon: <Utensils size={18} />
+                        },
+                        {
+                            time: "14:30",
+                            title: "浦添大公園 (C區)",
+                            desc: "★ 著名的超長溜滑梯，也有幼幼區。記得帶滑草板或厚紙板墊屁股。",
+                            type: "park",
+                            query: "Urasoe Great Park",
+                            icon: <Trees size={18} />
+                        },
+                        {
+                            time: "16:30",
+                            title: "Parco City 浦添西海岸",
+                            desc: "沖繩最大商場，離公園僅10分鐘。有阿卡將、Uniqlo、H&M，非常好逛。",
+                            type: "shopping",
+                            query: "San-A Urasoe West Coast PARCO CITY",
+                            icon: <ShoppingBag size={18} />
+                        },
+                        {
+                            time: "18:30",
+                            title: "晚餐：敘敘苑 (Parco City店)",
+                            desc: "★ 高級燒肉，享受無敵海景與極致美味。建議提前訂位。",
+                            type: "food",
+                            tags: ["海景燒肉", "需訂位"],
+                            query: "Jojoen Okinawa Urasoe Parco City",
+                            icon: <Star size={18} />
+                        }
+                    ]
+                },
+                {
+                    day: "Day 5",
+                    date: "12/24 (週三)",
+                    title: "首里漫步 & 最後採買",
+                    highlight: "古蹟巡禮 + 完美 Ending",
+                    activities: [
+                        {
+                            time: "09:30",
+                            title: "首里城公園",
+                            desc: "參觀守禮門。推薦帶小孩去旁邊的「龍潭」餵魚看鴨子。",
+                            type: "sightseeing",
+                            query: "Shuri Castle",
+                            icon: <MapPin size={18} />
+                        },
+                        {
+                            time: "11:30",
+                            title: "午餐：首里周邊",
+                            desc: "琉球茶房 (氣氛好) 或 首里堀川 (隱密小店)。",
+                            type: "food",
+                            query: "Ryukyu Sabo Ashibiuna",
+                            icon: <Utensils size={18} />
+                        },
+                        {
+                            time: "13:30",
+                            title: "Naha Main Place (補貨)",
+                            desc: "如果前幾天沒買夠，這裡超市很大，適合最後補買伴手禮。",
+                            type: "shopping",
+                            query: "San-A Naha Main Place",
+                            icon: <ShoppingBag size={18} />
+                        },
+                        {
+                            time: "15:30",
+                            title: "前往機場",
+                            desc: "回飯店拿行李，前往那霸機場 (國內線航廈買伴手禮/吃豬肉蛋飯糰)。",
+                            type: "transport",
+                            query: "Naha Airport",
+                            icon: <Plane size={18} />
+                        }
+                    ]
+                }
+            ];
+
+            const getTypeColor = (type) => {
+                switch (type) {
+                    case 'mac_shopping': return 'bg-rose-600 text-white border-rose-700 shadow-md';
+                    case 'transport': return 'bg-blue-100 text-blue-700 border-blue-200';
+                    case 'shopping': return 'bg-purple-100 text-purple-700 border-purple-200';
+                    case 'park': return 'bg-green-100 text-green-700 border-green-200';
+                    case 'sightseeing': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                    case 'food': return 'bg-orange-100 text-orange-700 border-orange-200';
+                    default: return 'bg-gray-100 text-gray-700 border-gray-200';
+                }
+            };
+
+            return (
+                <div 
+                    className="min-h-screen font-sans text-slate-800 pb-20 relative"
+                    style={{
+                        backgroundImage: 'url("BG.jpg")', 
+                        backgroundSize: 'cover', 
+                        backgroundAttachment: 'fixed',
+                        backgroundPosition: 'center',
+                        backgroundColor: '#f0f9ff' // Fallback color
+                    }}
+                >
+                    {/* Background Overlay */}
+                    <div className="absolute inset-0 bg-slate-50/50 -z-10"></div>
+
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-blue-600/90 to-blue-800/90 text-white p-6 shadow-lg sticky top-0 z-20 backdrop-blur-sm">
+                        <div className="flex flex-col">
+                            <h1 className="text-2xl font-bold mb-1 flex flex-wrap items-baseline gap-2">
+                                沖繩親子全家遊 
+                                <span className="text-sm font-normal text-blue-200 bg-blue-900/30 px-2 py-0.5 rounded-full">
+                                    by AI親子成長屋
+                                </span>
+                            </h1>
+                            <p className="text-blue-100 text-sm">2025/12/20 - 12/24 | 全家同樂</p>
+                        </div>
+                    </div>
+
+                    <div className="max-w-md mx-auto p-4 space-y-6">
+                        
+                        {/* Map Gallery Section */}
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div className="bg-slate-50/80 p-3 border-b border-slate-200 flex justify-between items-center">
+                                <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                                    <Map size={18} className="text-blue-600" />
+                                    精選親子地圖 (點擊開啟)
+                                </h3>
+                            </div>
+                            <div className="p-4 overflow-x-auto">
+                                <div className="flex gap-3 pb-2 min-w-max">
+                                    {mapStyles.map((map) => (
+                                        <button 
+                                            key={map.id}
+                                            onClick={() => setActiveMap(map)}
+                                            className={`flex flex-col items-center gap-2 p-3 rounded-lg border min-w-[100px] transition-transform hover:scale-105 active:scale-95 ${map.color} border-current/20 bg-white shadow-sm`}
+                                        >
+                                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shadow-inner">
+                                                <ImageIcon size={20} />
+                                            </div>
+                                            <span className="text-xs font-bold">{map.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-slate-400 text-center mt-2">
+                                    ← 左右滑動查看更多風格 →
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Days Rendering */}
+                        {itinerary.map((day, index) => (
+                            <div key={index} className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden border border-slate-100/50">
+                                {/* Day Header */}
+                                <div className="bg-slate-50/80 p-3 flex justify-between items-center border-b border-slate-200">
+                                    <div>
+                                        <span className="font-bold text-slate-700 block text-lg">{day.day}</span>
+                                        <span className="text-xs text-slate-500">{day.date}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-xs font-bold text-slate-700 block">{day.title}</span>
+                                        <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full inline-block mt-1">
+                                            {day.highlight}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Special Day Note */}
+                                {day.note && (
+                                    <div className="bg-rose-50 px-4 py-2 text-xs text-rose-700 border-b border-rose-100 flex gap-2 items-center font-bold">
+                                        <Laptop size={14} />
+                                        {day.note}
+                                    </div>
+                                )}
+
+                                {/* Activities List */}
+                                <div className="p-4 space-y-6">
+                                    {day.activities.map((act, actIndex) => (
+                                        <div key={actIndex} className="relative pl-6 border-l-2 border-slate-200 last:border-0 pb-1">
+                                            {/* Timeline Dot */}
+                                            <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-sm flex items-center justify-center ${
+                                                act.title.includes('敘敘苑') || act.title.includes('蕎蕎蕎') ? 'bg-orange-500 animate-pulse' :
+                                                act.type === 'mac_shopping' ? 'bg-rose-600' : 
+                                                act.type === 'shopping' ? 'bg-purple-500' : 
+                                                act.type === 'park' ? 'bg-green-500' : 
+                                                act.type === 'transport' ? 'bg-blue-400' : 
+                                                act.type === 'food' ? 'bg-orange-400' : 'bg-emerald-400'
+                                            }`}>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="mb-1">
+                                                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-slate-800 font-mono">{act.time}</span>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getTypeColor(act.type)} font-medium flex items-center gap-1`}>
+                                                            {act.icon}
+                                                            {act.type === 'transport' ? '交通' : 
+                                                            act.type === 'mac_shopping' ? 'Mac' : 
+                                                            act.type === 'shopping' ? '購物' : 
+                                                            act.type === 'park' ? '公園' :
+                                                            act.type === 'sightseeing' ? '景點' : '餐飲'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <h3 className={`text-base font-semibold leading-tight mb-1 ${act.title.includes('敘敘苑') || act.title.includes('蕎蕎蕎') ? 'text-orange-600' : 'text-slate-800'}`}>
+                                                    {act.title}
+                                                </h3>
+                                                
+                                                <p className="text-sm text-slate-500 leading-relaxed mb-2">
+                                                    {act.desc}
+                                                </p>
+
+                                                {/* 詳細攻略區塊 */}
+                                                {act.details && (
+                                                    <div className="mt-3 mb-4 bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                                                        <div className="p-3 border-b border-slate-200">
+                                                            <h4 className="text-xs font-bold text-emerald-600 flex items-center gap-1 mb-2">
+                                                                <AlertCircle size={12} /> 旅遊小叮嚀
+                                                            </h4>
+                                                            <ul className="space-y-1.5">
+                                                                {act.details.tips.map((tip, idx) => (
+                                                                    <li key={idx} className="text-xs text-slate-600 pl-2 border-l-2 border-emerald-300">
+                                                                        <strong className="text-slate-800">{tip.title}：</strong>
+                                                                        {tip.text}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div className="p-3 bg-slate-100/50">
+                                                            <h4 className="text-xs font-bold text-blue-600 flex items-center gap-1 mb-2">
+                                                                <Clock size={12} /> 建議時間分配 (3-5hr)
+                                                            </h4>
+                                                            <div className="grid grid-cols-1 gap-2">
+                                                                {act.details.times.map((time, idx) => (
+                                                                    <div key={idx} className="flex items-start text-xs">
+                                                                        <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono mr-2 whitespace-nowrap min-w-[60px] text-center">
+                                                                            {time.time}
+                                                                        </span>
+                                                                        <div>
+                                                                            <span className="font-bold text-slate-700">{time.label}</span>
+                                                                            <span className="text-slate-500 ml-1">- {time.sub}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Tags */}
+                                                {act.tags && (
+                                                    <div className="mb-3 flex flex-wrap gap-1">
+                                                        {act.tags.map((tag, tIdx) => (
+                                                            <span key={tIdx} className={`text-[10px] px-2 py-1 rounded border font-bold flex items-center gap-1 ${
+                                                                tag.includes('海景') || tag.includes('訂位') ? 'bg-orange-50 text-orange-700 border-orange-200' : 
+                                                                'bg-rose-50 text-rose-700 border-rose-200'
+                                                            }`}>
+                                                                {tag.includes('海景') ? <Star size={10} /> : <Zap size={10} />}
+                                                                {tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Navigation Button */}
+                                                {(act.query || act.customLink) && (
+                                                    <a 
+                                                        href={act.customLink || getMapLink(act.query)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors shadow-sm active:scale-95 border ${
+                                                            act.type === 'mac_shopping' ? 'bg-rose-600 border-rose-600 text-white' :
+                                                            act.title.includes('敘敘苑') || act.title.includes('蕎蕎蕎') ? 'bg-orange-500 border-orange-500 text-white' :
+                                                            'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                        }`}
+                                                    >
+                                                        <Navigation size={12} />
+                                                        {act.type === 'mac_shopping' ? '導航去買 Mac' : 
+                                                        act.title.includes('敘敘苑') ? '導航去吃肉' : 
+                                                        act.title.includes('蕎蕎蕎') ? '導航去吃麵' : 'Google Map'}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Footer Social Links */}
+                        <div className="mt-8 pt-6 border-t border-slate-200/50 bg-white/80 backdrop-blur-sm rounded-xl p-4 text-center">
+                            <h3 className="text-sm font-bold text-slate-500 mb-4">關注更多親子旅遊資訊</h3>
+                            <div className="flex justify-center gap-4">
+                                <a 
+                                    href="https://www.facebook.com/p/Ai%E8%A6%AA%E5%AD%90%E6%88%90%E9%95%B7%E5%B1%8B-61579308823985/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    aria-label="Facebook"
+                                    className="w-10 h-10 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-md hover:bg-[#166fe5] transition-colors"
+                                >
+                                    <Facebook size={20} />
+                                </a>
+                                <a 
+                                    href="https://www.instagram.com/aifamily0708?igsh=MXdlbzFsaTYxMDhidw%3D%3D&utm_source=qr" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    aria-label="Instagram"
+                                    className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shadow-md hover:opacity-90 transition-opacity"
+                                >
+                                    <Instagram size={20} />
+                                </a>
+                                <a 
+                                    href="https://youtube.com/@aifamily0708?si=wNQOpbrDk312GpC5" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    aria-label="YouTube"
+                                    className="w-10 h-10 rounded-full bg-[#FF0000] text-white flex items-center justify-center shadow-md hover:bg-[#cc0000] transition-colors"
+                                >
+                                    <Youtube size={20} />
+                                </a>
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-4">© 2025 AI親子成長屋 All Rights Reserved.</p>
+                        </div>
+
+                    </div>
+
+                    {/* Map Modal (Simulation) */}
+                    {activeMap && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setActiveMap(null)}>
+                            <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+                                <div className="p-4 border-b flex justify-between items-center bg-slate-50">
+                                    <h3 className="font-bold text-slate-700">{activeMap.name}</h3>
+                                    <button onClick={() => setActiveMap(null)} className="p-1 hover:bg-slate-200 rounded-full">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-8 flex flex-col items-center justify-center bg-slate-100 min-h-[300px] text-center">
+                                    <div className={`w-20 h-20 rounded-full ${activeMap.color} flex items-center justify-center mb-4`}>
+                                        <Map size={40} />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-700 mb-2">地圖預覽區</h4>
+                                    <p className="text-slate-500 mb-4">{activeMap.desc}</p>
+                                    <div className="text-xs text-slate-400 border border-dashed border-slate-300 p-4 rounded bg-white">
+                                        (此處為示意功能，實際可連結至雲端圖片 okinawa_map0{activeMap.id}.jpg)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<ItineraryApp />);
+    </script>
+</body>
+</html>
