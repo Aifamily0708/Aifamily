@@ -49,7 +49,7 @@
         import { 
             Plane, Car, ShoppingBag, Baby, MapPin, Utensils, Navigation, 
             Ship, Trees, Zap, Laptop, Sun, Star, Info, Clock, AlertCircle, 
-            Map, Facebook, Instagram, Youtube, Image as ImageIcon, X
+            Map, Facebook, Instagram, Youtube, Image as ImageIcon, X, ZoomIn
         } from 'lucide-react';
 
         const ItineraryApp = () => {
@@ -58,13 +58,13 @@
 
             const getMapLink = (query) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 
-            // 地圖資料 (模擬 5 張不同風格地圖)
+            // 地圖資料 (更新為實際圖片路徑，移除已不顯示的 desc 欄位以保持整潔)
             const mapStyles = [
-                { id: 1, name: "可愛手繪風", color: "bg-pink-100 text-pink-700", desc: "適合小朋友閱讀的童趣地圖" },
-                { id: 2, name: "詳細路網風", color: "bg-blue-100 text-blue-700", desc: "包含所有公車與電車路線" },
-                { id: 3, name: "景點插畫風", color: "bg-green-100 text-green-700", desc: "主要景點都有精美插圖" },
-                { id: 4, name: "美食攻略風", color: "bg-orange-100 text-orange-700", desc: "標註了所有必吃美食位置" },
-                { id: 5, name: "極簡設計風", color: "bg-slate-100 text-slate-700", desc: "清晰易懂的現代風格" },
+                { id: 1, name: "可愛手繪風", color: "bg-pink-100 text-pink-700", image: "images/okinawa_map01.png" },
+                { id: 2, name: "詳細路網風", color: "bg-blue-100 text-blue-700", image: "images/okinawa_map02.png" },
+                { id: 3, name: "景點插畫風", color: "bg-green-100 text-green-700", image: "images/okinawa_map03.png" },
+                { id: 4, name: "美食攻略風", color: "bg-orange-100 text-orange-700", image: "images/okinawa_map04.png" },
+                { id: 5, name: "極簡設計風", color: "bg-slate-100 text-slate-700", image: "images/okinawa_map05.png" },
             ];
 
             const itinerary = [
@@ -315,18 +315,36 @@
             };
 
             return (
-                <div 
-                    className="min-h-screen font-sans text-slate-800 pb-20 relative"
-                    style={{
-                        backgroundImage: 'url("BG.jpg")', 
-                        backgroundSize: 'cover', 
-                        backgroundAttachment: 'fixed',
-                        backgroundPosition: 'center',
-                        backgroundColor: '#f0f9ff' // Fallback color
-                    }}
-                >
-                    {/* Background Overlay */}
-                    <div className="absolute inset-0 bg-slate-50/50 -z-10"></div>
+                <div className="min-h-screen font-sans text-slate-800 pb-20 relative">
+                    
+                    {/* Fixed Background with Blur and Fade */}
+                    <div 
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundImage: 'url("images/BG.jpg")',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            filter: 'blur(4px)', // 打糊 (Blur)
+                            zIndex: -20,
+                            transform: 'scale(1.05)' // 稍微放大以避免模糊邊緣
+                        }}
+                    />
+                    {/* White Overlay for "Fade" (Lightening) effect */}
+                    <div 
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(255, 255, 255, 0.65)', // 淡化 (Whitening overlay)
+                            zIndex: -10
+                        }}
+                    />
 
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600/90 to-blue-800/90 text-white p-6 shadow-lg sticky top-0 z-20 backdrop-blur-sm">
@@ -357,18 +375,28 @@
                                         <button 
                                             key={map.id}
                                             onClick={() => setActiveMap(map)}
-                                            className={`flex flex-col items-center gap-2 p-3 rounded-lg border min-w-[100px] transition-transform hover:scale-105 active:scale-95 ${map.color} border-current/20 bg-white shadow-sm`}
+                                            className={`flex flex-col items-center gap-2 p-3 rounded-lg border min-w-[120px] transition-transform hover:scale-105 active:scale-95 ${map.color} border-current/20 bg-white shadow-sm`}
                                         >
-                                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shadow-inner">
-                                                <ImageIcon size={20} />
+                                            {/* 小圖示改為顯示圖片縮圖 */}
+                                            <div className="w-24 h-16 rounded-md bg-white shadow-inner flex items-center justify-center overflow-hidden border border-black/5 relative group">
+                                                <img 
+                                                    src={map.image} 
+                                                    alt={map.name} 
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none'; // 如果圖片載入失敗則隱藏圖片
+                                                    }}
+                                                />
+                                                {/* 如果圖片載入失敗，顯示備用圖示 (透過CSS控制) */}
+                                                <div className="absolute inset-0 flex items-center justify-center -z-10">
+                                                    <ImageIcon size={24} className="opacity-30" />
+                                                </div>
                                             </div>
-                                            <span className="text-xs font-bold">{map.name}</span>
+                                            {/* 已移除圖片下方風格名稱文字 */}
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-xs text-slate-400 text-center mt-2">
-                                    ← 左右滑動查看更多風格 →
-                                </p>
+                                {/* 已移除底部滑動提示文字 */}
                             </div>
                         </div>
 
@@ -550,25 +578,34 @@
 
                     </div>
 
-                    {/* Map Modal (Simulation) */}
+                    {/* Map Modal (圖片版) */}
                     {activeMap && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setActiveMap(null)}>
-                            <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-                                <div className="p-4 border-b flex justify-between items-center bg-slate-50">
-                                    <h3 className="font-bold text-slate-700">{activeMap.name}</h3>
+                            <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden relative flex flex-col" onClick={(e) => e.stopPropagation()}>
+                                <div className="p-4 border-b flex justify-between items-center bg-slate-50 shrink-0">
+                                    <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                                        <Map size={18} /> {activeMap.name}
+                                    </h3>
                                     <button onClick={() => setActiveMap(null)} className="p-1 hover:bg-slate-200 rounded-full">
                                         <X size={20} />
                                     </button>
                                 </div>
-                                <div className="p-8 flex flex-col items-center justify-center bg-slate-100 min-h-[300px] text-center">
-                                    <div className={`w-20 h-20 rounded-full ${activeMap.color} flex items-center justify-center mb-4`}>
-                                        <Map size={40} />
-                                    </div>
-                                    <h4 className="text-lg font-bold text-slate-700 mb-2">地圖預覽區</h4>
-                                    <p className="text-slate-500 mb-4">{activeMap.desc}</p>
-                                    <div className="text-xs text-slate-400 border border-dashed border-slate-300 p-4 rounded bg-white">
-                                        (此處為示意功能，實際可連結至雲端圖片 okinawa_map0{activeMap.id}.jpg)
-                                    </div>
+                                <div className="p-4 flex-1 overflow-auto bg-slate-100 flex flex-col items-center">
+                                    {/* 實際圖片顯示 */}
+                                    <img 
+                                        src={activeMap.image} 
+                                        alt={activeMap.name} 
+                                        className="w-full h-auto rounded shadow-lg object-contain max-h-[70vh]"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.style.display = 'none';
+                                            e.target.parentNode.innerHTML += `<div class="text-xs text-red-500 mt-2 p-2 border border-red-200 bg-red-50 rounded">無法載入圖片 (${activeMap.image})，請確認檔案位置。</div>`;
+                                        }}
+                                    />
+                                    {/* 已移除風格說明文字 */}
+                                    <a href={activeMap.image} target="_blank" rel="noopener" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-2">
+                                        <ZoomIn size={12} /> 查看原始大圖
+                                    </a>
                                 </div>
                             </div>
                         </div>
