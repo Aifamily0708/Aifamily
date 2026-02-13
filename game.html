@@ -1,0 +1,628 @@
+import React, { useState, useEffect } from 'react';
+import { Users, Star, StarHalf, ChevronRight, Sparkles, Filter, Car, PartyPopper, TrainFront, Coffee, X, Clock, Trophy, Play, CheckCircle2, Facebook, Instagram, Youtube } from 'lucide-react';
+
+// 遊戲資料 (新增 rules 詳細規則)
+const games = [
+  {
+    id: 1,
+    title: '🏮 歡樂猜燈謎',
+    players: '3人以上',
+    difficulty: 2,
+    difficultyLabel: '輕鬆動腦',
+    tags: ['傳統必備', '老少咸宜', '益智'],
+    mode: ['home', 'traffic'],
+    description: '傳統年味絕對少不了的環節！由一人擔任關主準備各式燈謎、腦筋急轉彎或家族小八卦，其他人搶答。',
+    tips: '若在車上，可以改猜「與數字有關的成語」或「猜猜車上某個人的特徵」。',
+    rules: [
+      '選出一位「關主」負責出題 (可上網查燈謎或自創)。',
+      '關主唸出題目，其他人舉手搶答。',
+      '答對者獲得一分 (或是獲得一顆糖果/紅包)。',
+      '累積最多分者獲勝！'
+    ],
+    tool: 'scoreboard' // 啟用計分板
+  },
+  {
+    id: 6,
+    title: '🚗 瘋狂成語接龍',
+    players: '2人以上',
+    difficulty: 3,
+    difficultyLabel: '殺時間神器',
+    tags: ['免道具', '反應力', '教育'],
+    mode: ['traffic'],
+    description: '塞車這時候最適合動動腦！考驗詞彙量與反應速度。',
+    tips: '如果成語太難，可以放寬規則，只要是「詞語」就可以，甚至可以玩「食物接龍」越玩越餓！',
+    rules: [
+      '第一位玩家說出一句四字成語 (如：新年快樂)。',
+      '下一位玩家必須用最後一個字 (樂) 當開頭接新的成語 (如：樂不思蜀)。',
+      '接不出來或思考超過 5 秒者淘汰或接受懲罰 (唱歌或說笑話)。',
+      '堅持到最後的人獲勝。'
+    ],
+    tool: 'timer' // 啟用倒數計時
+  },
+  {
+    id: 7,
+    title: '🎵 哼歌猜名大賽',
+    players: '2人以上',
+    difficulty: 2,
+    difficultyLabel: '氣氛擔當',
+    tags: ['音樂', '懷舊金曲', '超嗨'],
+    mode: ['traffic'],
+    description: '不需要看手機！出題者只能用「哼」的（不能唱出歌詞）哼一段旋律，其他人猜歌名。',
+    tips: '駕駛也可以當出題者（因為只需要哼歌），能有效防止駕駛想睡覺喔！',
+    rules: [
+      '出題者選一首歌，只能用「哼」的旋律，不能唱出歌詞。',
+      '其他玩家猜歌名或歌手。',
+      '猜對的人成為下一位出題者。'
+    ],
+    tool: 'scoreboard'
+  },
+  {
+    id: 8,
+    title: '🤫 指尖終極密碼',
+    players: '2-5人',
+    difficulty: 2,
+    difficultyLabel: '無聲刺激',
+    tags: ['絕對安靜', '心理戰', '免道具'],
+    mode: ['transport', 'home'],
+    description: '經典遊戲的「靜音版」。全程禁止說話，看誰先忍不住笑場發出聲音就輸了！',
+    tips: '適合在高鐵/火車上玩，完全不會吵到別人。',
+    rules: [
+      '莊家在心裡想一個 1-100 的數字。',
+      '玩家輪流用「手勢」比出數字猜測。',
+      '莊家只能用手勢回應範圍：向上指(更大)、向下指(更小)。',
+      '猜中密碼的人輸掉遊戲！'
+    ],
+    tool: 'none'
+  },
+  {
+    id: 9,
+    title: '📱 備忘錄故事接龍',
+    players: '2人以上',
+    difficulty: 3,
+    difficultyLabel: '創意無限',
+    tags: ['傳遞手機', '腦洞大開', '文字遊戲'],
+    mode: ['transport'],
+    description: '打開手機備忘錄，一人一句，寫出最荒謬的故事。',
+    tips: '高鐵上訊號不好也沒關係，因為是用本機備忘錄玩！',
+    rules: [
+      '開啟手機備忘錄，第一人在第一行寫下一句開頭 (例如：除夕夜，外星人降落在阿嬤家...)。',
+      '將手機傳給下一位，他在第二行續寫一句，以此類推。',
+      '傳完一輪或大家寫累了，由最後一個人朗讀完整故事。'
+    ],
+    tool: 'none'
+  },
+  {
+    id: 4,
+    title: '🎨 歪樓傳情畫意',
+    players: '5-8人',
+    difficulty: 2,
+    difficultyLabel: '繪畫白痴友善',
+    tags: ['畫圖接龍', '創意無限', '桌遊'],
+    mode: ['home', 'transport'],
+    description: '類似「畫圖版的傳聲筒」。畫得越醜反而越好玩！',
+    tips: '在大眾運輸上玩，記得準備硬板紙筆，且傳遞時動作要輕，避免打擾鄰座。',
+    rules: [
+      '每人一本紙/畫板。第一頁寫下題目 (如：舞龍舞獅)。',
+      '傳給下一位，他看題目後，在第二頁畫出來。',
+      '再傳給下一位，他看圖猜是什麼，寫在第三頁文字。',
+      '重複「文字 -> 圖 -> 文字」直到傳回本人，一起檢討是誰畫歪了！'
+    ],
+    tool: 'none'
+  },
+  {
+    id: 2,
+    title: '🃏 刺激射龍門',
+    players: '4-12人',
+    difficulty: 1,
+    difficultyLabel: '簡單好上手',
+    tags: ['心跳加速', '撲克牌', '試試手氣'],
+    mode: ['home'],
+    description: '過年最受歡迎的撲克牌遊戲！規則極度簡單卻刺激無比。',
+    tips: '可使用籌碼或糖果代替零錢，安全又好玩。',
+    rules: [
+      '發給玩家兩張牌，翻開。',
+      '玩家判斷第三張牌是否會介於這兩張牌之間 (射門)。',
+      '如果覺得會，喊注並發第三張牌。',
+      '介於中間 -> 贏走注金；撞柱(與前兩張同點) -> 賠兩倍；界外 -> 賠一倍。'
+    ],
+    tool: 'scoreboard'
+  },
+  {
+    id: 3,
+    title: '🎭 爆笑比手畫腳',
+    players: '4-20人 (適合分組)',
+    difficulty: 3,
+    difficultyLabel: '考驗默契',
+    tags: ['肢體喜劇', '笑到肚子痛', '團隊合作'],
+    mode: ['home'],
+    description: '只能用肢體動作表達題目，絕對不能出聲！',
+    tips: '題目可以設定為「新年吉祥話」、「知名電影」或「家族成員特徵」。',
+    rules: [
+      '分成兩隊，每隊輪流派一人上台比劃。',
+      '出題者看題目後，用肢體語言表達，不可說話或發出聲音。',
+      '隊友在限時內猜出答案，猜對最多題的隊伍獲勝。'
+    ],
+    tool: 'timer'
+  },
+  {
+    id: 5,
+    title: '🏃‍♂️ 支援前線',
+    players: '6人以上 (適合分組)',
+    difficulty: 4,
+    difficultyLabel: '體力活',
+    tags: ['全家動起來', '滿屋子跑', '氣氛嗨炸'],
+    mode: ['home'],
+    description: '主持人喊出需要的物品，最快湊齊的隊伍獲勝。',
+    tips: '記得把易碎物品收好，並提醒大家在客廳奔跑時注意安全。',
+    rules: [
+      '選一位主持人，其他人分組。',
+      '主持人喊出題目：(例如：我要三支手錶、一條紅皮帶！)。',
+      '各組隊員馬上搜集物品放到前方桌上。',
+      '最快湊齊且正確的隊伍得分。'
+    ],
+    tool: 'scoreboard'
+  }
+];
+
+// --- 小工具元件 ---
+
+// 簡單計時器
+const GameTimer = () => {
+  const [seconds, setSeconds] = useState(60);
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    let interval = null;
+    if (isActive && seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds(seconds => seconds - 1);
+      }, 1000);
+    } else if (seconds === 0) {
+      setIsActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [isActive, seconds]);
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setSeconds(60);
+  };
+
+  return (
+    <div className="bg-gray-100 p-4 rounded-xl flex flex-col items-center space-y-3 w-full">
+      <div className="text-gray-500 font-bold text-sm flex items-center gap-2">
+        <Clock className="w-4 h-4" /> 遊戲倒數
+      </div>
+      <div className={`text-4xl font-mono font-bold ${seconds < 10 ? 'text-red-500' : 'text-gray-800'}`}>
+        {seconds}s
+      </div>
+      <div className="flex gap-2 w-full">
+        <button 
+          onClick={() => setIsActive(!isActive)}
+          className={`flex-1 py-2 rounded-lg font-bold text-white transition-colors ${isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'}`}
+        >
+          {isActive ? '暫停' : '開始計時'}
+        </button>
+        <button 
+          onClick={resetTimer}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold"
+        >
+          重置
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// 簡單計分板
+const ScoreBoard = () => {
+  const [scores, setScores] = useState({ A: 0, B: 0 });
+
+  const adjustScore = (team, delta) => {
+    setScores(prev => ({ ...prev, [team]: Math.max(0, prev[team] + delta) }));
+  };
+
+  return (
+    <div className="bg-gray-100 p-4 rounded-xl flex flex-col items-center space-y-3 w-full">
+      <div className="text-gray-500 font-bold text-sm flex items-center gap-2">
+        <Trophy className="w-4 h-4" /> 簡易計分
+      </div>
+      <div className="flex justify-around w-full gap-4">
+        {['A', 'B'].map(team => (
+          <div key={team} className="flex flex-col items-center bg-white p-3 rounded-lg shadow-sm flex-1">
+            <span className="text-gray-500 font-bold mb-1">{team} 隊/人</span>
+            <span className="text-3xl font-bold text-indigo-600 mb-2">{scores[team]}</span>
+            <div className="flex gap-2">
+              <button onClick={() => adjustScore(team, -1)} className="w-8 h-8 rounded-full bg-red-100 text-red-600 font-bold hover:bg-red-200">-</button>
+              <button onClick={() => adjustScore(team, 1)} className="w-8 h-8 rounded-full bg-green-100 text-green-600 font-bold hover:bg-green-200">+</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 渲染星星難度
+const DifficultyStars = ({ level, colorClass }) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (i <= level) {
+      stars.push(<Star key={i} className={`w-4 h-4 fill-current ${colorClass}`} />);
+    } else {
+      stars.push(<Star key={i} className="w-4 h-4 text-gray-200" />);
+    }
+  }
+  return <div className="flex space-x-1">{stars}</div>;
+};
+
+// 遊戲詳情 Modal
+const GameModal = ({ game, onClose, colorConfig }) => {
+  if (!game) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className={`${colorConfig.headerBg} p-4 text-white flex justify-between items-center shrink-0`}>
+          <h3 className="text-xl font-bold flex items-center gap-2">
+             {game.title}
+          </h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="p-6 overflow-y-auto">
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {game.tags.map(tag => (
+              <span key={tag} className={`px-2 py-1 text-xs rounded-md font-medium ${colorConfig.tagBg}`}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            {game.description}
+          </p>
+
+          {/* Rules Section */}
+          <div className="mb-6">
+            <h4 className={`text-lg font-bold mb-3 flex items-center gap-2 ${colorConfig.text}`}>
+              <CheckCircle2 className="w-5 h-5" /> 遊戲規則
+            </h4>
+            <div className="space-y-3">
+              {game.rules.map((rule, idx) => (
+                <div key={idx} className="flex gap-3">
+                  <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${colorConfig.headerBg}`}>
+                    {idx + 1}
+                  </span>
+                  <p className="text-gray-700 text-sm">{rule}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tools Section */}
+          {game.tool !== 'none' && (
+            <div className="mb-6">
+              <h4 className={`text-lg font-bold mb-3 flex items-center gap-2 ${colorConfig.text}`}>
+                <Play className="w-5 h-5" /> 遊戲小幫手
+              </h4>
+              {game.tool === 'timer' && <GameTimer />}
+              {game.tool === 'scoreboard' && <ScoreBoard />}
+            </div>
+          )}
+
+          {/* Tips Box */}
+          <div className={`border-l-4 p-3 rounded-r-lg text-sm ${colorConfig.tipBox}`}>
+            <strong>💡 玩法小貼士：</strong> {game.tips}
+          </div>
+        </div>
+
+        {/* Footer Action */}
+        <div className="p-4 border-t bg-gray-50 shrink-0">
+          <button 
+            onClick={onClose}
+            className={`w-full py-3 rounded-xl font-bold text-white shadow-md transition-transform active:scale-95 ${colorConfig.buttonPrimary}`}
+          >
+            了解，開始玩吧！
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  const [currentMode, setCurrentMode] = useState('home');
+  const [activeFilter, setActiveFilter] = useState('全部');
+  const [selectedGame, setSelectedGame] = useState(null); // 控制 Modal 顯示
+
+  const filters = ['全部', '簡單好上手', '輕鬆動腦', '考驗默契', '體力活'];
+
+  const getModeConfig = (mode) => {
+    switch(mode) {
+      case 'traffic':
+        return {
+          bg: 'bg-blue-50',
+          text: 'text-slate-800',
+          headerBg: 'bg-indigo-600',
+          accent: 'text-indigo-600',
+          cardBorder: 'border-indigo-100 hover:border-indigo-400',
+          buttonPrimary: 'bg-indigo-600 hover:bg-indigo-700',
+          buttonLight: 'bg-indigo-50 text-indigo-800',
+          tagBg: 'bg-indigo-100 text-indigo-800',
+          starColor: 'text-yellow-400',
+          icon: <Car className="w-8 h-8 text-yellow-300" />,
+          title: '國道塞車救援指南',
+          desc: '塞車不無聊！精選「免道具、聽覺系」遊戲，駕駛也能開心參與，提神又有趣！',
+          footer: '祝大家 行車平安，塞車不煩躁！',
+          filterButtonActive: 'bg-indigo-500 text-white',
+          tipBox: 'bg-blue-50 border-blue-400 text-blue-900'
+        };
+      case 'transport':
+        return {
+          bg: 'bg-emerald-50',
+          text: 'text-emerald-900',
+          headerBg: 'bg-emerald-600',
+          accent: 'text-emerald-600',
+          cardBorder: 'border-emerald-100 hover:border-emerald-400',
+          buttonPrimary: 'bg-emerald-600 hover:bg-emerald-700',
+          buttonLight: 'bg-emerald-50 text-emerald-800',
+          tagBg: 'bg-emerald-100 text-emerald-800',
+          starColor: 'text-yellow-400',
+          icon: <TrainFront className="w-8 h-8 text-white" />,
+          title: '高鐵/火車 安靜遊戲區',
+          desc: '嘘！這裡有適合「低音量、不打擾鄰座」的遊戲，讓漫長的車程變成有趣的時光。',
+          footer: '祝大家 旅途愉快，準時抵達！',
+          filterButtonActive: 'bg-emerald-500 text-white',
+          tipBox: 'bg-teal-50 border-teal-400 text-teal-900'
+        };
+      default: // home
+        return {
+          bg: 'bg-orange-50',
+          text: 'text-red-900',
+          headerBg: 'bg-red-600',
+          accent: 'text-red-600',
+          cardBorder: 'border-transparent hover:border-yellow-400',
+          buttonPrimary: 'bg-red-600 hover:bg-red-700',
+          buttonLight: 'bg-red-50 text-red-800',
+          tagBg: 'bg-orange-100 text-orange-800',
+          starColor: 'text-yellow-400',
+          icon: <Sparkles className="w-8 h-8 text-yellow-300" />,
+          title: '迎春納福 團圓遊戲',
+          desc: '吃完年夜飯不知道要幹嘛？精選最適合全家大小的遊戲，從阿公阿嬤到小學姪子都能嗨翻天！',
+          footer: '祝大家 新年快樂，闔家平安，馬年行大運！',
+          filterButtonActive: 'bg-red-500 text-white',
+          tipBox: 'bg-yellow-50 border-yellow-400 text-yellow-900'
+        };
+    }
+  };
+
+  const config = getModeConfig(currentMode);
+
+  let filteredGames = games.filter(game => game.mode.includes(currentMode));
+  
+  if (currentMode === 'home' && activeFilter !== '全部') {
+     filteredGames = filteredGames.filter(game => game.difficultyLabel === activeFilter);
+  }
+
+  return (
+    <div className={`min-h-screen font-sans pb-12 transition-colors duration-500 ${config.bg} ${config.text}`}>
+      
+      {/* 遊戲詳情 Modal */}
+      {selectedGame && (
+        <GameModal 
+          game={selectedGame} 
+          colorConfig={config} 
+          onClose={() => setSelectedGame(null)} 
+        />
+      )}
+
+      {/* 頂部橫幅 */}
+      <header className={`py-12 px-4 shadow-lg relative overflow-hidden transition-colors duration-500 ${config.headerBg}`}>
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          {currentMode === 'traffic' && (
+             <>
+               <Car className="w-64 h-64 absolute -top-10 -right-10 rotate-12 text-white" />
+               <Car className="w-48 h-48 absolute -bottom-10 -left-10 -rotate-12 text-white" />
+             </>
+          )}
+          {currentMode === 'transport' && (
+             <>
+               <TrainFront className="w-64 h-64 absolute -top-10 -right-10 rotate-12 text-white" />
+               <Coffee className="w-32 h-32 absolute bottom-5 left-10 text-white" />
+             </>
+          )}
+          {currentMode === 'home' && (
+             <>
+               <div className="text-9xl absolute -top-10 -left-10 rotate-12 text-white">福</div>
+               <div className="text-9xl absolute -bottom-10 -right-10 -rotate-12 text-white">春</div>
+             </>
+          )}
+        </div>
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10 text-white">
+          <div className="flex flex-col items-center">
+            <div className="flex justify-center items-center space-x-3 mb-2">
+              {config.icon}
+              <h1 className="text-3xl md:text-5xl font-bold tracking-wider text-white drop-shadow-md">
+                {config.title}
+              </h1>
+              {config.icon}
+            </div>
+            {/* 新增副標題 */}
+            <p className="text-yellow-200 font-medium text-lg tracking-widest drop-shadow-sm opacity-90">
+              By AI親子成長屋
+            </p>
+          </div>
+          <p className="text-lg md:text-xl max-w-2xl mx-auto mt-4 leading-relaxed opacity-90">
+            {config.desc}
+          </p>
+        </div>
+      </header>
+
+      {/* 場景切換控制區 */}
+      <div className="max-w-4xl mx-auto px-4 mt-8 mb-6">
+        <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
+          <button
+            onClick={() => { setCurrentMode('home'); setActiveFilter('全部'); }}
+            className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-sm ${
+              currentMode === 'home' ? 'bg-red-600 text-white ring-2 ring-red-300 shadow-md transform scale-105' : 'bg-white text-gray-500 hover:bg-red-50'
+            }`}
+          >
+            <PartyPopper className="w-5 h-5" />
+            <span className="font-bold">🏠 在家團圓</span>
+          </button>
+          
+          <button
+            onClick={() => { setCurrentMode('traffic'); setActiveFilter('全部'); }}
+            className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-sm ${
+              currentMode === 'traffic' ? 'bg-indigo-600 text-white ring-2 ring-indigo-300 shadow-md transform scale-105' : 'bg-white text-gray-500 hover:bg-indigo-50'
+            }`}
+          >
+            <Car className="w-5 h-5" />
+            <span className="font-bold">🚗 塞車救援</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentMode('transport'); setActiveFilter('全部'); }}
+            className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-sm ${
+              currentMode === 'transport' ? 'bg-emerald-600 text-white ring-2 ring-emerald-300 shadow-md transform scale-105' : 'bg-white text-gray-500 hover:bg-emerald-50'
+            }`}
+          >
+            <TrainFront className="w-5 h-5" />
+            <span className="font-bold">🚄 安靜車廂</span>
+          </button>
+        </div>
+
+        {currentMode === 'home' && (
+          <div className="flex flex-col md:flex-row items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-opacity-20">
+            <div className="flex flex-wrap gap-2 justify-center w-full">
+              <div className="flex items-center space-x-2 text-gray-700 font-bold mr-2">
+                <Filter className="w-5 h-5" />
+                <span className="hidden sm:inline">篩選：</span>
+              </div>
+              {filters.map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                    activeFilter === filter
+                      ? config.filterButtonActive + ' shadow-md'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 遊戲列表 */}
+      <div className="max-w-4xl mx-auto px-4 space-y-6">
+        {filteredGames.map((game) => (
+          <div 
+            key={game.id} 
+            className={`bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border-2 group relative overflow-hidden ${config.cardBorder}`}
+          >
+            {currentMode !== 'home' && (
+              <div className={`absolute top-0 right-0 text-white text-xs font-bold px-3 py-1 rounded-bl-xl z-10 flex items-center gap-1 ${currentMode === 'traffic' ? 'bg-indigo-500' : 'bg-emerald-500'}`}>
+                {currentMode === 'traffic' ? <Car className="w-3 h-3" /> : <TrainFront className="w-3 h-3" />}
+                <span>{currentMode === 'traffic' ? '塞車適玩' : '安靜適玩'}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col md:flex-row gap-6 pt-2">
+              <div className="flex-1">
+                <h2 className={`text-2xl font-bold mb-3 flex items-center ${config.accent}`}>
+                  {game.title}
+                </h2>
+                
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {game.tags.map(tag => (
+                    <span 
+                      key={tag} 
+                      className={`px-2 py-1 text-xs rounded-md font-medium ${config.tagBg}`}
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  {game.description}
+                </p>
+
+                <div className={`border-l-4 p-3 rounded-r-lg text-sm ${config.tipBox}`}>
+                  <strong>💡 玩法小貼士：</strong> {game.tips}
+                </div>
+              </div>
+
+              <div className={`md:w-64 rounded-xl p-4 flex flex-col justify-center space-y-4 ${config.buttonLight}`}>
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="bg-white p-2 rounded-full shadow-sm">
+                    <Users className={`w-5 h-5 ${config.accent}`} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold opacity-60">適合人數</div>
+                    <div className="font-semibold">{game.players}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="bg-white p-2 rounded-full shadow-sm">
+                    <StarHalf className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold opacity-60">難易度</div>
+                    <div className="flex items-center space-x-2">
+                      <DifficultyStars level={game.difficulty} colorClass={config.starColor} />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">({game.difficultyLabel})</div>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={() => setSelectedGame(game)}
+                  className={`mt-2 w-full flex items-center justify-center space-x-1 text-white py-2 rounded-lg transition-colors font-medium ${config.buttonPrimary}`}
+                >
+                  <span>{currentMode !== 'home' ? '看詳細規則' : '準備開玩'}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <footer className={`text-center mt-12 pb-8 transition-colors ${config.text}`}>
+        <p className="font-bold text-lg mb-6">{config.footer}</p>
+        
+        {/* 新增：社群按鈕與版權聲明 */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex gap-4">
+            <a href="#" className={`p-3 rounded-full ${config.buttonLight} hover:opacity-80 transition-opacity transform hover:scale-110`}>
+              <Facebook className="w-5 h-5" />
+            </a>
+            <a href="#" className={`p-3 rounded-full ${config.buttonLight} hover:opacity-80 transition-opacity transform hover:scale-110`}>
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a href="#" className={`p-3 rounded-full ${config.buttonLight} hover:opacity-80 transition-opacity transform hover:scale-110`}>
+              <Youtube className="w-5 h-5" />
+            </a>
+          </div>
+          
+          <div className="text-xs opacity-60 mt-2 font-medium">
+            <p>AI親子成長屋 © {new Date().getFullYear()} All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
