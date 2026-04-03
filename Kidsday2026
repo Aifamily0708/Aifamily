@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 兒童節連假全台攻略</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 圖示 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 隱藏卷軸的自訂樣式 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans pb-24">
+
+    <!-- Header 頂部橫幅 -->
+    <header class="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 pt-12 pb-10 px-4 rounded-b-[3rem] shadow-lg mb-10 relative overflow-hidden">
+        <!-- 裝飾用光暈 -->
+        <div class="absolute top-[-20%] left-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-center space-x-3 mb-2">
+                <i data-lucide="party-popper" class="w-8 h-8 text-yellow-300 animate-bounce"></i>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-center tracking-wide text-white drop-shadow-md">2026 兒童節連假攻略</h1>
+                <i data-lucide="party-popper" class="w-8 h-8 text-yellow-300 animate-bounce"></i>
+            </div>
+            <p class="text-center text-pink-100 mt-3 font-medium text-lg drop-shadow-sm">4/3 - 4/6 全台放電、0元神優惠總整理</p>
+            <div class="flex justify-center mt-3">
+                <span class="bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-yellow-300 text-sm font-bold tracking-wider border border-white/30 shadow-sm">
+                    by Ai親子成長屋
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6">
+        
+        <!-- Navigation Tabs 分類選單容器 -->
+        <div id="tabs-container" class="flex overflow-x-auto hide-scrollbar space-x-3 mb-10 p-2">
+            <!-- 透過 JS 動態生成 -->
+        </div>
+
+        <!-- Content Section 標題與計數 -->
+        <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-xl font-extrabold text-slate-800 flex items-center">
+                <span class="bg-gradient-to-b from-pink-400 to-purple-500 w-2 h-6 rounded-full mr-3 inline-block"></span>
+                精選行程
+            </h2>
+            <span id="activity-count" class="text-sm font-bold text-purple-700 bg-purple-100 px-4 py-1.5 rounded-full shadow-sm">
+                <!-- 透過 JS 動態更新 -->
+            </span>
+        </div>
+
+        <!-- Grid of Cards 卡片容器 -->
+        <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 透過 JS 動態生成 -->
+        </div>
+
+    </main>
+
+    <!-- 固定式版權聲明與社群連結 Footer -->
+    <footer class="fixed bottom-0 w-full bg-white/80 backdrop-blur-lg shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] border-t border-slate-200 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-600 tracking-wide">
+                © 2026 Ai 親子成長屋 版權所有
+            </span>
+            <div class="flex space-x-5">
+                <a href="https://www.instagram.com/aifamily0708?igsh=MXdlbzFsaTYxMDhidw%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-pink-500 transition-colors" aria-label="Instagram">
+                    <i data-lucide="instagram" class="w-5 h-5"></i>
+                </a>
+                <a href="https://www.facebook.com/p/Ai%E8%A6%AA%E5%AD%90%E6%88%90%E9%95%B7%E5%B1%8B-61579308823985/" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-blue-500 transition-colors" aria-label="Facebook">
+                    <i data-lucide="facebook" class="w-5 h-5"></i>
+                </a>
+                <a href="https://www.youtube.com/@aifamily0708?si=wNQOpbrDk312GpC5" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-red-500 transition-colors" aria-label="YouTube">
+                    <i data-lucide="youtube" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 邏輯區 -->
+    <script>
+        // 資料庫：區域設定
+        const regions = [
+            { id: 'south', name: '南部主場', icon: '☀️', color: 'from-orange-400 to-rose-400' },
+            { id: 'central', name: '中部樂遊', icon: '🎡', color: 'from-lime-400 to-emerald-500' },
+            { id: 'north', name: '北部尋寶', icon: '🗺️', color: 'from-sky-400 to-indigo-500' },
+            { id: 'east', name: '東部&全台', icon: '🌲', color: 'from-fuchsia-400 to-purple-500' },
+        ];
+
+        // 資料庫：全部 71 筆活動清單
+        const activities = [
+            // --- 南部 ---
+            { id: 1, region: 'south', city: '台南', title: '童遊時光 小火柴市集', location: '南紡購物中心 A2館1F', date: '4/3 - 4/6 14:00-20:00', desc: '超豐富文創攤位與街頭表演，東區就近放電首選！', tags: ['免費參與', '市集', '東區'], type: 'market' },
+            { id: 2, region: 'south', city: '台南', title: '唱所欲言 演唱會', location: '臺南文創產業園區', date: '4/5 17:00-20:10', desc: '言論自由日活動，拍謝少年、凹與山、邱淑蟬接力開唱。', tags: ['免費參與', '音樂', '東區'], type: 'art' },
+            { id: 3, region: 'south', city: '台南', title: '14倉兒童藝術節', location: '蕭壠文化園區', date: '4/4 - 4/5 10:00-17:00', desc: '超嗨 AhaColorShot 顏料派對與藝術工作坊，愛畫畫的小孩必去！', tags: ['免費參與', '藝術手作'], type: 'art' },
+            { id: 4, region: 'south', city: '台南', title: '臺史博轉圈圈 & 小樹市集', location: '臺灣歷史博物館', date: '4/3 - 4/6 10:00-15:00', desc: '戶外有超過250攤超大「小樹市集」，連假期間12歲以下兒童入館免費。', tags: ['12歲以下免費', '市集'], type: 'free' },
+            { id: 5, region: 'south', city: '台南', title: '童趣時光', location: '水交社文化園區', date: '4/4 - 4/5 13:00-18:00', desc: '園區變身大型遊樂園，免費玩泡泡、奇幻充氣水晶球與行動書車。', tags: ['免費參與', '親子放電'], type: 'event' },
+            { id: 6, region: 'south', city: '台南', title: '咚咚！童萌鼓動祭', location: '河樂廣場', date: '4/3 - 4/6', desc: '結合趴兔市集、魔術表演與鳳天神鼓沉浸式兒童劇《鼓舞水城》。', tags: ['免費參與', '市集', '表演'], type: 'market' },
+            { id: 7, region: 'south', city: '台南', title: '童心大馳騁', location: '走馬瀨農場', date: '4/1 - 4/12', desc: '大草皮放電！有小丑氣球魔術秀，連假期間12歲以下免門票。', tags: ['12歲以下免費', '農場'], type: 'free' },
+            { id: 8, region: 'south', city: '嘉義', title: 'Team Kids 尋寶遊戲', location: '故宮南院', date: '4/3 - 4/6', desc: '超神優惠！只要有12歲以下兒童同行，全家人通通免費參觀！', tags: ['同行全家免費', '超級優惠'], type: 'free' },
+            { id: 9, region: 'south', city: '高雄', title: '義大遊樂世界', location: '高雄義大', date: '4/3 - 4/6', desc: '12歲以下兒童搭配1名購買全票成人，入園只要1元！', tags: ['入園1元', '主題樂園'], type: 'discount' },
+            { id: 10, region: 'south', city: '高雄', title: '壽山童話祭', location: '壽山動物園', date: '4/3 - 4/6', desc: '加碼變裝換紙扇與寫生著色比賽，連假12歲以下免費入園。', tags: ['12歲以下免費', '動物園'], type: 'free' },
+            { id: 24, region: 'south', city: '台南', title: '玩埤一下', location: '葫蘆埤自然公園', date: '4/3 - 4/4 11:00-16:00', desc: '結合超人氣闖關遊戲、街頭藝人表演與親子DIY體驗。', tags: ['免費參與', '戶外放電'], type: 'event' },
+            { id: 25, region: 'south', city: '台南', title: '與水童行Cha Cha好', location: '隆田文資教育園區', date: '4/3 - 4/6 09:00-17:00', desc: '結合動畫與互動體驗，打造沉浸式水域世界。', tags: ['水域體驗', '文教'], type: 'art' },
+            { id: 26, region: 'south', city: '台南', title: '繽紛童樂趴', location: '七股鹽山', date: '4/3 - 4/6 09:00-18:00', desc: '七彩鹽山放電計畫！親子玩泡泡、大地塗鴉與任務闖關。', tags: ['免費參與', '塗鴉'], type: 'event' },
+            { id: 27, region: 'south', city: '台南', title: '和風・甜點生活節', location: '府東創意森林園區', date: '4/3 - 4/6 10:30-19:00', desc: '充滿職人風格的市集，和菓子與浴衣的最道地日式體驗。', tags: ['免費參與', '日式市集'], type: 'market' },
+            { id: 28, region: 'south', city: '台南', title: '糖蜜浪漫遇', location: '南化玉山寶光聖堂', date: '4/3 - 4/6 09:00-17:00', desc: '結合花旗木盛開景觀與假日市集，享受甜蜜農產與表演。', tags: ['免費參與', '賞花'], type: 'market' },
+            { id: 29, region: 'south', city: '台南', title: '台江童樂會', location: '台江地景公園', date: '4/3 - 4/4 09:00-17:00', desc: '好吃好玩市集、氣墊城堡與每日壓軸極致火舞表演。', tags: ['免費參與', '氣墊樂園'], type: 'event' },
+            { id: 30, region: 'south', city: '台南', title: '春暖花開逛好市', location: 'FOCUS 時尚流行館', date: '4/3 - 4/6 13:00-20:00', desc: '連假限定市集，結合氣球街藝與學生社團輪番登場。', tags: ['免費參與', '市集'], type: 'market' },
+            { id: 31, region: 'south', city: '台南', title: '童趣萬國狂歡派對', location: '萬國通路觀光工廠', date: '4/4 - 4/5 10:00-17:00', desc: '上百攤位二手好物挖寶，還有精彩表演與親子五感體驗。', tags: ['免費參與', '市集'], type: 'market' },
+            { id: 32, region: 'south', city: '台南', title: '光影相聚・樂舞宴饗', location: '新營文化中心', date: '4/3 - 4/4 15:00-19:00', desc: '平埔原住民族群文化節，特色市集與實力派歌手演出。', tags: ['免費參與', '音樂市集'], type: 'event' },
+            { id: 33, region: 'south', city: '台南', title: '動物遊行嘉年華', location: '頑皮世界', date: '4/4 - 4/5 13:30', desc: '震撼非洲戰鼓與熱鬧動物遊行，門票79折再送抵用券。', tags: ['門票79折', '動物園'], type: 'discount' },
+            { id: 34, region: 'south', city: '台南', title: '大員盛場市集', location: '安平運河畔', date: '4/3 - 4/6 16:00-20:00', desc: '歡慶台南運河100歲，集結在地品牌打造水岸悠活場域。', tags: ['免費參與', '水岸市集'], type: 'market' },
+            { id: 35, region: 'south', city: '台南', title: '夏日會員園遊會', location: '新光三越台南新天地', date: '4/3 - 4/6 13:00-21:00', desc: '超質感友の市市集，李浩瑋、163braces等重磅登台。', tags: ['免費參與', '音樂市集'], type: 'market' },
+            { id: 36, region: 'south', city: '台南', title: '美術館免票大放送', location: '台南市美術館', date: '4/4 限定', desc: '12歲以下免費入館，參加「春日童樂會」攝影拼貼創作！', tags: ['12歲以下免費', '藝術創作'], type: 'free' },
+            { id: 37, region: 'south', city: '台南', title: '兒童入園買一送一', location: '柳營尖山埤渡假村', date: '4/3 - 4/6', desc: '12歲以下兒童享入園買一送一，住宿也有專屬折扣。', tags: ['買一送一', '渡假村'], type: 'discount' },
+            { id: 38, region: 'south', city: '高雄', title: '恐龍酷樂園', location: '衛武營', date: '4/3 - 4/6', desc: '超震撼日本擬真恐龍團隊實境秀，還有恐龍大草原與市集！', tags: ['恐龍實境', '市集'], type: 'event' },
+            { id: 39, region: 'south', city: '高雄', title: '驚嘆號小島', location: '駁二藝術特區', date: '4/3 - 4/6', desc: 'Big Surprise！駁二專屬兒童節特別活動與驚喜體驗。', tags: ['港區放瘋', '藝文'], type: 'event' },
+            { id: 40, region: 'south', city: '高雄', title: '大港倉放瘋童樂會', location: '棧貳庫', date: '4/3 - 4/6', desc: '港邊吹風放電好去處，專屬兒童節的港區歡樂派對。', tags: ['港區市集', '放電'], type: 'event' },
+            { id: 41, region: 'south', city: '高雄', title: '高雄內門宋江陣', location: '內門區', date: '至 4/5 止', desc: '感受南台灣最熱血沸騰的傳統陣頭文化與總舖師手路菜。', tags: ['傳統文化', '節慶'], type: 'event' },
+            { id: 42, region: 'south', city: '高雄', title: '那瑪夏賞螢系列', location: '那瑪夏區', date: '4/3 - 4/30', desc: '夜晚浪漫賞螢，假日加碼漂漂河、氣墊水樂園及部落演唱會。', tags: ['生態賞螢', '山線'], type: 'event' },
+            { id: 43, region: 'south', city: '高雄', title: '山那邊的市集', location: '茂林/山線', date: '4/3 - 4/6', desc: '原森茶席與草地派對遊樂園，山線放電最佳補給站。', tags: ['草地派驚', '山線'], type: 'market' },
+            { id: 44, region: 'south', city: '高雄', title: '樂高®樂派對', location: '高雄市立圖書館', date: '4/4 限定', desc: '圖書館變身積木世界，兒童節專屬限定的創意樂高派對。', tags: ['免費參與', '創意手作'], type: 'art' },
+            { id: 45, region: 'south', city: '高雄', title: '童樂發現號', location: '高雄兒童美術館', date: '4/4 - 4/5', desc: '專屬探索任務、繪本劇場、手作課程與豐富戶外表演。', tags: ['藝術創作', '免票入場'], type: 'art' },
+            { id: 46, region: 'south', city: '高雄', title: '恐龍童樂大冒險', location: '國立科學工藝博物館', date: '4/3 - 4/6', desc: '結合科學闖關、STEM體驗與3D電影，在遊戲中學習！', tags: ['科學闖關', '教育'], type: 'event' },
+            { id: 47, region: 'south', city: '高雄', title: '爵對有春', location: '高雄流行音樂中心', date: '4/3 - 4/6', desc: '港灣音樂祭，爵士樂與春天海風陪伴的療癒時光。', tags: ['音樂', '海灣'], type: 'art' },
+            { id: 48, region: 'south', city: '高雄', title: '糖廠慶生童樂會', location: '橋頭糖廠', date: '4/3 - 4/6', desc: '台糖80週年慶生，吃冰搭五分車，還有復古童玩闖關！', tags: ['懷舊放電', '糖廠'], type: 'event' },
+            { id: 49, region: 'south', city: '高雄', title: '眷村趣遊尋彩蛋', location: '黃埔/建業新村', date: '4/3 - 4/30', desc: '魔法森林奇幻之旅、從繪本到繪畫，漫遊復古眷村。', tags: ['文化漫行', '彩蛋尋寶'], type: 'art' },
+            { id: 50, region: 'south', city: '高雄', title: '啟程出任務', location: '臺灣鳳梨工場', date: '4/3 - 4/18', desc: '走讀九曲堂聚落、場長春遊記，探索在地鳳梨產業故事。', tags: ['走讀探險', '文史'], type: 'event' },
+            { id: 51, region: 'south', city: '屏東', title: '海洋童遊會', location: '國立海洋生物博物館', date: '4/4 - 4/5', desc: '舞台表演、DIY手作、遊園車探索，開心認識海洋生態。', tags: ['海洋生態', '手作DIY'], type: 'event' },
+
+            // --- 中部 ---
+            { id: 11, region: 'central', city: '台中', title: '買大送小特惠', location: '麗寶樂園', date: '4/3 - 4/6', desc: '實施「買大送小」，買1張全票就送1位12歲以下兒童免費入場。', tags: ['買大送小', '主題樂園'], type: 'discount' },
+            { id: 12, region: 'central', city: '台中', title: '捐書作公益免門票', location: '台中海洋館', date: '4/3 - 4/6', desc: '6-12歲學童只要「捐2本書」，即可免費入場參觀。', tags: ['捐書免費', '教育'], type: 'free' },
+            { id: 13, region: 'central', city: '台中', title: '兒童節免票入館', location: '自然科學博物館 & 921園區', date: '4/4 限定', desc: '兒童節當日，12歲以下兒童皆享免費入館優惠。', tags: ['12歲以下免費', '博物館'], type: 'free' },
+            { id: 14, region: 'central', city: '台中', title: '玻璃畫布自由創作', location: '勤美術館', date: '4/3 - 4/6', desc: '三人同行送畫布，開放1F藝術廊道玻璃讓大家自由創作寫生。', tags: ['藝術手作', '優惠'], type: 'art' },
+            { id: 52, region: 'central', city: '台中', title: '童樂星球夢想啟航', location: '大里藝術廣場', date: '4/3 - 4/6', desc: '現場有泡泡秀、魔術表演與故事劇場接力演出。', tags: ['免費入場', '表演'], type: 'event' },
+            { id: 53, region: 'central', city: '台中', title: '兒童藝術節', location: '文心森林公園', date: '4/4 - 4/6', desc: '以「遊樂園」為主題，互動體驗、表演藝術及文創市集。', tags: ['藝術節', '市集'], type: 'art' },
+            { id: 54, region: 'central', city: '苗栗', title: '尚順幼童免費', location: '尚順育樂世界', date: '4/3 - 4/6', desc: '遊園券優惠價499元，身高未滿90cm幼童直接免費入場！', tags: ['幼童免費', '室內樂園'], type: 'discount' },
+            { id: 55, region: 'central', city: '苗栗', title: '恐龍特展免票遊', location: '西湖渡假村', date: '4/3 - 4/6', desc: '動態實境恐龍特展399元，可搭配1名12歲以下兒童免費入園！', tags: ['12歲以下免費', '恐龍展'], type: 'free' },
+            { id: 56, region: 'central', city: '雲林', title: '車牌對中享特惠', location: '劍湖山世界', date: '連假期間', desc: '車牌號碼對中1、7、9、8任一碼，門票最低299元起！', tags: ['門票優惠', '主題樂園'], type: 'discount' },
+            { id: 57, region: 'central', city: '台中', title: '兒童百元有找', location: '東勢林場', date: '4/3 - 4/6', desc: '超狂放電價！連假期間12歲以下兒童門票只要60元。', tags: ['門票60元', '森林浴'], type: 'discount' },
+            { id: 58, region: 'central', city: '南投', title: '鳥園免費玩', location: '鳳凰谷鳥園生態園區', date: '4/4 限定', desc: '歡慶兒童節，4/4 當天 12 歲以下兒童免費入園！', tags: ['12歲以下免費', '生態'], type: 'free' },
+
+            // --- 北部 ---
+            { id: 15, region: 'north', city: '新竹', title: '幼童專屬免費', location: '六福村主題遊樂園', date: '4/3 - 4/6', desc: '小小孩放電神優惠，連假期間6歲以下完全免門票！', tags: ['6歲以下免費', '主題樂園'], type: 'free' },
+            { id: 16, region: 'north', city: '台北', title: '家長同行也免費！', location: '台北當代藝術館', date: '4/3 - 4/5', desc: '佛心優惠！國小以下兒童及「2名陪同家長」全部免費入場。', tags: ['家長同行免費', '藝文'], type: 'free' },
+            { id: 17, region: 'north', city: '台北', title: '歡樂地圖免票遊', location: '兒童新樂園 & 動物園', date: '兒樂4/3-4/6｜動物園4/4', desc: '憑證享國小以下及「1名家長」免費入場 (兒樂遊樂設施另計)。', tags: ['家長同行免費', '樂園'], type: 'free' },
+            { id: 18, region: 'north', city: '台北', title: '纜車無限搭乘', location: '貓空纜車', date: '4/3 - 4/6', desc: '連假期間國小以下兒童不限次數，通通免費搭乘。', tags: ['國小以下免費', '交通'], type: 'free' },
+            { id: 19, region: 'north', city: '新北', title: '尋寶大作戰', location: '朱銘美術館', date: '4/3 - 4/5', desc: '國小以下及「2名陪同家長」免費，園區設計8大室內外尋寶關卡。', tags: ['家長同行免費', '藝術手作'], type: 'free' },
+            { id: 20, region: 'north', city: '桃園', title: '幼童超低特價', location: '小人國主題樂園', date: '4/3 - 4/6', desc: '3-6歲幼童入園特價只要67元，身分證有6或7另享專屬優惠。', tags: ['67元特價', '主題樂園'], type: 'discount' },
+            { id: 59, region: 'north', city: '台北', title: '北流歡樂島', location: '台北流行音樂中心', date: '4/4 - 4/5', desc: '變身大型奇幻樂園，有小朋友最愛的YOYO家族與童玩闖關！', tags: ['免費入場', 'YOYO家族'], type: 'event' },
+            { id: 60, region: 'north', city: '台北', title: '親水免門票', location: '台北自來水園區', date: '4/3 - 4/6', desc: '12歲以下兒童與1名家長享免費入園，現場還有彩繪老師進駐。', tags: ['家長同行免費', '親水'], type: 'free' },
+            { id: 61, region: 'north', city: '台北', title: '小翠紙公仔兌換', location: '國立故宮博物院', date: '4/3 - 4/6', desc: '國小以下免費參觀，還可兌換小翠公仔並參與神獸劇場。', tags: ['國小以下免費', '歷史'], type: 'free' },
+            { id: 62, region: 'north', city: '台北', title: '公園裡的藝術派對', location: '台北市立美術館', date: '4/3 限定', desc: '4/3全館民眾免票進館！有肢體放鬆教室與露天電影院。', tags: ['全民免費', '藝術派對'], type: 'free' },
+            { id: 63, region: 'north', city: '台北', title: '博物館免門票', location: '國立台灣博物館', date: '4/3 - 4/6', desc: '12歲以下兒童免費入場，陪同大人1人也可享半票優惠。', tags: ['12歲以下免費', '博物館'], type: 'free' },
+            { id: 64, region: 'north', city: '台北', title: '宇宙探險免費搭', location: '天文科學教育館', date: '4/3 - 4/6', desc: '超狂福利！12歲(含)以下兒童可免費搭乘熱門設施「宇宙探險」1次。', tags: ['免費搭乘', '天文'], type: 'free' },
+            { id: 65, region: 'north', city: '新北', title: '兒童節限定演出', location: '新北市美術館', date: '4/3 - 4/6', desc: '連假期間推出魔術秀、馬戲秀、特技秀以及豐富親子劇場。', tags: ['特技馬戲', '表演'], type: 'event' },
+            { id: 66, region: 'north', city: '新北', title: '小礦工出任務', location: '黃金博物館', date: '4/3 - 4/6', desc: '體驗小礦工親子走讀，金水廣場每日還有精彩藝文演出。', tags: ['礦工體驗', '走讀'], type: 'event' },
+            { id: 67, region: 'north', city: '新北', title: '氣候守護闖關', location: '野柳地質公園', date: '4/4 限定', desc: '4/4當天12歲以下免費入園，並參與漂流木彩繪與故事活動。', tags: ['12歲以下免費', '生態'], type: 'free' },
+            { id: 68, region: 'north', city: '新北', title: '幼童看海免費', location: '野柳海洋世界', date: '4/3 - 4/6', desc: '家有小小孩必去！連假期間6歲以下兒童免門票入場。', tags: ['6歲以下免費', '海洋'], type: 'free' },
+            { id: 69, region: 'north', city: '基隆', title: '親子海洋運動會', location: '國立海洋科技博物館', date: '4/3 - 4/6', desc: '12歲以下免費入館！4/4有親子運動會、趣味健走與闖關市集。', tags: ['12歲以下免費', '博物館'], type: 'free' },
+            { id: 70, region: 'north', city: '新竹', title: '魔術餵食大體驗', location: '新竹市立動物園', date: '4/4 限定', desc: '4/4兒童節當日免費入園！安排故事劇場、猛獸導覽與餵食。', tags: ['兒童免費', '動物園'], type: 'free' },
+
+            // --- 東部 & 全台 ---
+            { id: 21, region: 'east', city: '全台', title: '國家森林遊樂區', location: '阿里山、墾丁、奧萬大等14處', date: '4/3 - 4/6', desc: '大自然放電！12歲以下全數免費入園，還可免費搭乘烏來台車。', tags: ['12歲以下免費', '戶外踏青'], type: 'free' },
+            { id: 22, region: 'east', city: '花蓮', title: '買大送小', location: '遠雄海洋公園', date: '4/3 - 4/6', desc: '買1張全票就送1位12歲以下兒童免費入場，暢遊海洋世界。', tags: ['買大送小', '主題樂園'], type: 'discount' },
+            { id: 23, region: 'east', city: '宜蘭', title: '日式主題童遊', location: '綠舞莊園日式主題園區', date: '4/3 - 4/6', desc: '連假期間6歲以下免費入園，彩繪鯉魚旗拍照打卡再送牧草。', tags: ['6歲以下免費', '親子農場'], type: 'free' },
+            { id: 71, region: 'east', city: '台東', title: '原生動物探索', location: '台東原生應用植物園', date: '4/3 - 4/6', desc: '兒童入園送魚飼料、免費竹籤彩繪，解謎還可換小禮物！', tags: ['送魚飼料', '生態'], type: 'event' }
+        ];
+
+        let activeTab = 'south';
+
+        // Helper functions 針對顏色、樣式的設定
+        function getTypeStyles(type) {
+            switch (type) {
+                case 'free': return 'bg-rose-500 text-white shadow-sm';
+                case 'discount': return 'bg-amber-500 text-white shadow-sm';
+                case 'market': return 'bg-emerald-500 text-white shadow-sm';
+                case 'art': return 'bg-violet-500 text-white shadow-sm';
+                default: return 'bg-sky-500 text-white shadow-sm';
+            }
+        }
+
+        function getTypeColor(type) {
+            switch (type) {
+                case 'free': return 'text-rose-500';
+                case 'discount': return 'text-amber-500';
+                case 'market': return 'text-emerald-500';
+                case 'art': return 'text-violet-500';
+                default: return 'text-sky-500';
+            }
+        }
+
+        function getTypeBg(type) {
+            switch (type) {
+                case 'free': return 'bg-rose-50 border-rose-100';
+                case 'discount': return 'bg-amber-50 border-amber-100';
+                case 'market': return 'bg-emerald-50 border-emerald-100';
+                case 'art': return 'bg-violet-50 border-violet-100';
+                default: return 'bg-sky-50 border-sky-100';
+            }
+        }
+
+        function getTypeIconName(type) {
+            switch (type) {
+                case 'free': return 'gift';
+                case 'discount': return 'ticket';
+                case 'market': return 'tent';
+                case 'art': return 'baby';
+                default: return 'party-popper';
+            }
+        }
+
+        function getTypeText(type) {
+            switch (type) {
+                case 'free': return '超省錢';
+                case 'discount': return '好康優惠';
+                default: return '玩翻天';
+            }
+        }
+
+        // 渲染上方地區按鈕
+        function renderTabs() {
+            const container = document.getElementById('tabs-container');
+            container.innerHTML = regions.map(region => {
+                const isActive = activeTab === region.id;
+                const activeClass = isActive 
+                    ? `bg-gradient-to-r ${region.color} text-white border-transparent shadow-lg transform scale-105 -translate-y-1`
+                    : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50 hover:border-slate-200 hover:-translate-y-0.5';
+
+                return `
+                <button onclick="changeTab('${region.id}')" class="flex-1 min-w-[110px] flex flex-col items-center justify-center py-3 px-4 rounded-2xl transition-all duration-300 ease-in-out border-2 ${activeClass}">
+                    <span class="text-2xl mb-1">${region.icon}</span>
+                    <span class="font-bold text-sm whitespace-nowrap">${region.name}</span>
+                </button>
+                `;
+            }).join('');
+        }
+
+        // 渲染下方活動卡片
+        function renderCards() {
+            const filteredActivities = activities.filter(a => a.region === activeTab);
+            document.getElementById('activity-count').innerText = `共 ${filteredActivities.length} 項活動`;
+
+            const container = document.getElementById('cards-container');
+            container.innerHTML = filteredActivities.map(item => {
+                const regionColor = regions.find(r => r.id === item.region).color;
+                
+                const tagsHtml = item.tags.map(tag => `
+                    <span class="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-500">
+                        <i data-lucide="tag" class="w-3 h-3 mr-1"></i>
+                        ${tag}
+                    </span>
+                `).join('');
+
+                return `
+                <div class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-purple-200 flex flex-col h-full relative overflow-hidden group">
+                    <!-- Colorful Top Accent -->
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${regionColor}"></div>
+
+                    <!-- Type Badge top right -->
+                    <div class="absolute top-4 right-0 px-3 py-1.5 rounded-l-full text-xs font-bold flex items-center shadow-sm ${getTypeStyles(item.type)}">
+                        <i data-lucide="${getTypeIconName(item.type)}" class="w-4 h-4 mr-1"></i>
+                        ${getTypeText(item.type)}
+                    </div>
+
+                    <!-- City Tag -->
+                    <div class="mb-3 mt-1">
+                        <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg tracking-wider">
+                            ${item.city}
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-800 mb-3 leading-tight group-hover:text-purple-600 transition-colors">
+                        ${item.title}
+                    </h3>
+
+                    <div class="space-y-2 mb-4 mt-auto">
+                        <div class="flex items-start">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${getTypeColor(item.type)}"></i>
+                            <span class="text-sm font-medium text-slate-600">${item.location}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${getTypeColor(item.type)}"></i>
+                            <span class="text-sm font-medium text-slate-600">${item.date}</span>
+                        </div>
+                    </div>
+
+                    <p class="text-slate-700 text-sm leading-relaxed mb-5 p-3.5 rounded-2xl border ${getTypeBg(item.type)}">
+                        ${item.desc}
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 mt-auto pt-3 border-t border-slate-100">
+                        ${tagsHtml}
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // 初始化與重新渲染 Lucide 圖示
+            lucide.createIcons();
+        }
+
+        // 切換區域的分頁處理
+        window.changeTab = function(regionId) {
+            activeTab = regionId;
+            renderTabs();
+            renderCards();
+        }
+
+        // 頁面載入初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTabs();
+            renderCards();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
